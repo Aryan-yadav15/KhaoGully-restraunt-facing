@@ -1,0 +1,318 @@
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { authService } from '../../services/auth';
+import { ordersService } from '../../services/orders';
+import { CumulativeItem, CustomerOrder } from '../../types/order.types';
+import CumulativeView from './CumulativeView';
+import IndividualView from './IndividualView';
+
+const COUNTDOWN_DURATION = 30 * 60; // 30 minutes in seconds
+
+const OrdersPage = () => {
+  const [user] = useState(authService.getCurrentUser());
+  const [cumulativeItems, setCumulativeItems] = useState<CumulativeItem[]>([]);
+  const [individualOrders, setIndividualOrders] = useState<CustomerOrder[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [hasOrders, setHasOrders] = useState(false);
+  const [fetchedAt, setFetchedAt] = useState<string | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<number>(COUNTDOWN_DURATION);
+
+  useEffect(() => {
+    checkOwnerStatus();
+    
+    // Check if there's a saved countdown in localStorage
+    const savedCountdownData = localStorage.getItem('orderCountdown');
+    if (savedCountdownData) {
+      const { startTime, fetchTime } = JSON.parse(savedCountdownData);
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const remaining = Math.max(0, COUNTDOWN_DURATION - elapsed);
+      
+      if (remaining > 0) {
+        setTimeRemaining(remaining);
+        setFetchedAt(fetchTime);
+        setHasOrders(true);
+        // Fetch orders from backend to restore state
+        restoreOrders();
+      } else {
+        // Timer expired, clear localStorage
+        localStorage.removeItem('orderCountdown');
+      }
+    }
+  }, []);
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (!hasOrders || timeRemaining <= 0) return;
+
+    const timer = setInterval(() => {
+      setTimeRemaining(prev => {
+        const newTime = prev - 1;
+        if (newTime <= 0) {
+          // Timer expired - just stop the timer, keep displaying orders
+          localStorage.removeItem('orderCountdown');
+          return 0;
+        }
+        return newTime;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [hasOrders, timeRemaining]);
+
+  const restoreOrders = async () => {
+    try {
+      const response = await ordersService.fetchOrders();
+      if (response && response.individual_orders && response.individual_orders.length > 0) {
+        setCumulativeItems(response.cumulative_orders || []);
+        // Orders now come with their response status from database
+        setIndividualOrders(response.individual_orders || []);
+      } else {
+        // No orders found, clear state
+        setHasOrders(false);
+        localStorage.removeItem('orderCountdown');
+      }
+    } catch (err) {
+      console.error('Failed to restore orders:', err);
+    }
+  };
+
+  const formatCountdown = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const formatTimestamp = (timestamp: string): string => {
+    const date = new Date(timestamp);
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  const checkOwnerStatus = async () => {
+    try {
+      const status = await ordersService.getOwnerStatus();
+      console.log('Owner status:', status);
+      if (status.approval_status !== 'approved' || !status.restaurant_uid) {
+        setError('Your account is not fully approved or restaurant UID is not assigned.');
+      }
+    } catch (err: any) {
+      console.error('Status check error:', err);
+    }
+  };
+
+  const handleCheckOrders = async () => {
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      console.log('Fetching orders...');
+      const response = await ordersService.fetchOrders();
+      console.log('Orders response:', response);
+      
+      if (!response || !response.cumulative_orders || response.cumulative_orders.length === 0) {
+        setError('No orders found for your restaurant at this time.');
+        setLoading(false);
+        return;
+      }
+
+      // Get the fetched_at timestamp from the first order (they should all have the same time)
+      const fetchTime = response.individual_orders[0]?.fetched_at || new Date().toISOString();
+      
+      setCumulativeItems(response.cumulative_orders || []);
+      setIndividualOrders(response.individual_orders || []);
+      setFetchedAt(fetchTime);
+      setHasOrders(true);
+      setTimeRemaining(COUNTDOWN_DURATION);
+
+      // Save new countdown (no need to clear orderResponses as we're not using it)
+      localStorage.setItem('orderCountdown', JSON.stringify({
+        startTime: Date.now(),
+        fetchTime: fetchTime
+      }));
+    } catch (err: any) {
+      console.error('Fetch orders error:', err);
+      setError(err.response?.data?.detail || err.message || 'Failed to fetch orders');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOrderResponse = async (orderId: string, decision: 'accepted' | 'rejected') => {
+    setError('');
+    setSuccess('');
+
+    try {
+      await ordersService.submitResponse({
+        order_id: orderId,
+        decision: decision
+      });
+
+      setSuccess(`Order ${decision} successfully!`);
+      
+      // Update the order locally to show its decision status immediately
+      const updatedOrders = individualOrders.map(order => {
+        if ((order.id || order.order_id) === orderId) {
+          return {
+            ...order,
+            order_status: decision,
+            responded: true
+          };
+        }
+        return order;
+      });
+      setIndividualOrders(updatedOrders);
+
+      // Check if all orders have been responded to
+      const allResponded = updatedOrders.every(order => order.responded);
+      
+      // Keep displaying even when all orders are processed
+      // Don't reset or clear anything
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to submit response');
+    }
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto pb-12">
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+          <div>
+            <h1 className="text-4xl font-bold text-[#1A1A1A] mb-2">Orders Dashboard</h1>
+            <p className="text-gray-500">Manage your incoming orders</p>
+          </div>
+          <div className="mt-4 md:mt-0 flex items-center gap-4">
+            <Link
+              to="/orders/history"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Order History
+            </Link>
+            <div className="inline-block bg-[#1C8C3C]/10 px-4 py-2 rounded-lg border border-[#1C8C3C]/20">
+              <p className="text-sm text-[#1C8C3C] font-semibold">{user?.restaurant_name || 'N/A'}</p>
+              <p className="text-xs text-[#1C8C3C]/70">{user?.full_name || 'N/A'}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="border-t border-gray-100 pt-6">
+          {!hasOrders && !loading && (
+            <div className="text-center py-8">
+              <div className="mb-6">
+                <svg className="w-16 h-16 mx-auto text-gray-300" style={{ width: '4rem', height: '4rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                <p className="text-gray-500 mt-2">Ready to receive orders?</p>
+              </div>
+              <button
+                onClick={handleCheckOrders}
+                disabled={loading}
+                className="bg-[#1C8C3C] hover:bg-[#157030] text-white px-8 py-3.5 rounded-xl text-lg font-semibold shadow-lg shadow-[#1C8C3C]/30 transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                Check for New Orders
+              </button>
+            </div>
+          )}
+          
+          {loading && (
+            <div className="text-center py-12">
+              <div className="inline-flex items-center px-4 py-2 font-semibold leading-6 text-[#1C8C3C] transition ease-in-out duration-150 cursor-not-allowed">
+                <svg className="animate-spin -ml-1 mr-3 h-8 w-8 text-[#1C8C3C]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Checking for orders...
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl mb-6 flex items-center shadow-sm animate-fade-in">
+          <svg className="w-6 h-6 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"/></svg>
+          {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="bg-green-50 border border-green-200 text-green-700 px-6 py-4 rounded-xl mb-6 flex items-center shadow-sm animate-fade-in">
+          <svg className="w-6 h-6 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
+          {success}
+        </div>
+      )}
+
+      {hasOrders && cumulativeItems && cumulativeItems.length > 0 && (
+        <div className="space-y-8 animate-fade-in-up">
+          {/* Timestamp and Countdown Display */}
+          <div className="bg-gradient-to-r from-[#1C8C3C]/10 to-blue-50 rounded-2xl border border-[#1C8C3C]/20 p-6">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              {/* Orders Received Time */}
+              <div className="flex items-center gap-3">
+                <div className="bg-white p-3 rounded-lg shadow-sm">
+                  <svg className="w-6 h-6 text-[#1C8C3C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Orders Received</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    {fetchedAt ? formatTimestamp(fetchedAt) : 'Just now'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Countdown Timer */}
+              <div className="flex items-center gap-3">
+                <div className={`bg-white p-3 rounded-lg shadow-sm ${timeRemaining <= 300 ? 'animate-pulse' : ''}`}>
+                  <svg className={`w-6 h-6 ${timeRemaining <= 300 ? 'text-red-600' : 'text-orange-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Time Remaining</p>
+                  <p className={`text-2xl font-bold ${timeRemaining <= 300 ? 'text-red-600' : 'text-orange-600'}`}>
+                    {formatCountdown(timeRemaining)}
+                  </p>
+                </div>
+              </div>
+
+              {/* Order Count */}
+              <div className="flex items-center gap-3">
+                <div className="bg-white p-3 rounded-lg shadow-sm">
+                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Pending Orders</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {individualOrders.filter(order => !order.responded).length}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <CumulativeView items={cumulativeItems} />
+
+          <IndividualView orders={individualOrders || []} onOrderResponse={handleOrderResponse} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default OrdersPage;

@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/* Ola-inspired Green, White & Black Theme */
+:root {
+  --ola-green: #1C8C3C;
+  --ola-green-light: #2AAF4F;
+  --ola-green-dark: #157030;
+  --ola-black: #1A1A1A;
+  --ola-gray: #4A4A4A;
+  --ola-light-gray: #F5F5F5;
+  --ola-white: #FFFFFF;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--ola-light-gray);
+  min-height: 100vh;
+  color: var(--ola-black);
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
