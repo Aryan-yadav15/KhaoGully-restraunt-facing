@@ -21,57 +21,44 @@ const OrdersPage = () => {
 
   useEffect(() => {
     checkOwnerStatus();
-    
-    // Check if there's a saved countdown in localStorage
-    const savedCountdownData = localStorage.getItem('orderCountdown');
-    if (savedCountdownData) {
-      const { startTime, fetchTime } = JSON.parse(savedCountdownData);
-      const elapsed = Math.floor((Date.now() - startTime) / 1000);
-      const remaining = Math.max(0, COUNTDOWN_DURATION - elapsed);
-      
-      if (remaining > 0) {
-        setTimeRemaining(remaining);
-        setFetchedAt(fetchTime);
-        setHasOrders(true);
-        // Fetch orders from backend to restore state
-        restoreOrders();
-      } else {
-        // Timer expired, clear localStorage
-        localStorage.removeItem('orderCountdown');
-      }
-    }
+    // Try to restore orders from backend on page load
+    restoreOrders();
   }, []);
 
-  // Countdown timer effect
+  // Calculate time remaining based on fetched_at timestamp
   useEffect(() => {
-    if (!hasOrders || timeRemaining <= 0) return;
+    if (!hasOrders || !fetchedAt) return;
 
-    const timer = setInterval(() => {
-      setTimeRemaining(prev => {
-        const newTime = prev - 1;
-        if (newTime <= 0) {
-          // Timer expired - just stop the timer, keep displaying orders
-          localStorage.removeItem('orderCountdown');
-          return 0;
-        }
-        return newTime;
-      });
-    }, 1000);
+    const calculateTimeRemaining = () => {
+      const fetchTime = new Date(fetchedAt).getTime();
+      const expiryTime = fetchTime + (COUNTDOWN_DURATION * 1000); // 30 min after fetch
+      const now = Date.now();
+      const remaining = Math.max(0, Math.floor((expiryTime - now) / 1000));
+      setTimeRemaining(remaining);
+    };
+
+    // Calculate immediately
+    calculateTimeRemaining();
+
+    // Update every second
+    const timer = setInterval(calculateTimeRemaining, 1000);
 
     return () => clearInterval(timer);
-  }, [hasOrders, timeRemaining]);
+  }, [hasOrders, fetchedAt]);
 
   const restoreOrders = async () => {
     try {
       const response = await ordersService.fetchOrders();
       if (response && response.individual_orders && response.individual_orders.length > 0) {
+        const fetchTime = response.individual_orders[0]?.fetched_at || new Date().toISOString();
         setCumulativeItems(response.cumulative_orders || []);
-        // Orders now come with their response status from database
         setIndividualOrders(response.individual_orders || []);
+        setFetchedAt(fetchTime);
+        setHasOrders(true);
       } else {
         // No orders found, clear state
         setHasOrders(false);
-        localStorage.removeItem('orderCountdown');
+        setFetchedAt(null);
       }
     } catch (err) {
       console.error('Failed to restore orders:', err);
@@ -131,13 +118,7 @@ const OrdersPage = () => {
       setIndividualOrders(response.individual_orders || []);
       setFetchedAt(fetchTime);
       setHasOrders(true);
-      setTimeRemaining(COUNTDOWN_DURATION);
-
-      // Save new countdown (no need to clear orderResponses as we're not using it)
-      localStorage.setItem('orderCountdown', JSON.stringify({
-        startTime: Date.now(),
-        fetchTime: fetchTime
-      }));
+      setSuccess('Orders loaded successfully!');
     } catch (err: any) {
       console.error('Fetch orders error:', err);
       setError(err.response?.data?.detail || err.message || 'Failed to fetch orders');
@@ -259,6 +240,19 @@ const OrdersPage = () => {
           {/* Timestamp and Countdown Display */}
           <div className="bg-gradient-to-r from-[#1C8C3C]/10 to-blue-50 rounded-2xl border border-[#1C8C3C]/20 p-6">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              {/* Refresh Button */}
+              <button
+                onClick={handleCheckOrders}
+                disabled={loading}
+                className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 rounded-lg border border-[#1C8C3C]/30 text-[#1C8C3C] font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Check for new orders"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Refresh Orders
+              </button>
+
               {/* Orders Received Time */}
               <div className="flex items-center gap-3">
                 <div className="bg-white p-3 rounded-lg shadow-sm">

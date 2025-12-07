@@ -231,8 +231,8 @@ const OrderHistory = () => {
                   {/* Order Info */}
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
-                      <span className="text-sm font-mono text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                        #{order.order_id.substring(0, 8)}...
+                      <span className="text-xs font-mono text-gray-500 bg-gray-100 px-2 py-1 rounded break-all">
+                        #{order.order_id}
                       </span>
                       {getStatusBadge(order.order_status)}
                       {order.payment_status && (

@@ -49,9 +49,6 @@ const IndividualView: React.FC<IndividualViewProps> = ({ orders, onOrderResponse
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {validOrders.map((order, index) => {
             const orderId = order.id || order.order_id || `order-${index}`;
-            const orderIdDisplay = typeof orderId === 'string' && orderId.length > 8 
-              ? `${orderId.substring(0, 8)}...` 
-              : orderId;
             
             return (
               <div
@@ -63,7 +60,7 @@ const IndividualView: React.FC<IndividualViewProps> = ({ orders, onOrderResponse
                     <div className="flex items-center">
                       <span className="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-1 rounded mr-2">#{index + 1}</span>
                       <h3 className="text-sm font-medium text-gray-500">
-                        ID: <span className="text-gray-800 font-mono">{orderIdDisplay}</span>
+                        ID: <span className="text-gray-800 font-mono text-xs">{orderId}</span>
                       </h3>
                     </div>
                     <div className="mt-2">

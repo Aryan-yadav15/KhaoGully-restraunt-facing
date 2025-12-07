@@ -62,11 +62,8 @@ async def fetch_orders(current_user: dict = Depends(get_current_user)):
                 individual_orders=[]
             )
         
-        # Get the most recent fetched_at timestamp
-        latest_fetch_time = result.data[0]["fetched_at"]
-        
-        # Filter orders from the most recent batch only (same fetched_at time)
-        orders = [order for order in result.data if order["fetched_at"] == latest_fetch_time]
+        # Get all orders (not just from the latest batch)
+        orders = result.data
         
         # Get responses for these orders
         order_ids = [order["order_id"] for order in orders]
