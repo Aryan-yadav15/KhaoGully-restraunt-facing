@@ -9,6 +9,7 @@ import OrdersPage from './pages/Orders/OrdersPage';
 import OrderHistory from './pages/Orders/OrderHistory';
 import EarningsDashboard from './pages/Earnings/EarningsDashboard';
 import TransactionHistory from './pages/Earnings/TransactionHistory';
+import ProfilePage from './pages/Profile/ProfilePage';
 import Pending from './pages/Pending';
 
 function App() {
@@ -63,6 +64,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <TransactionHistory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
               </ProtectedRoute>
             }
           />

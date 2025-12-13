@@ -16,6 +16,10 @@ const Signup = () => {
     restaurant_address: '',
     restaurant_phone: '',
     restaurant_email: '',
+    bank_account_number: '',
+    bank_ifsc_code: '',
+    bank_account_holder_name: '',
+    upi_id: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -238,6 +242,73 @@ const Signup = () => {
                     name="restaurant_email"
                     value={formData.restaurant_email}
                     onChange={handleChange}
+                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] transition-all"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bank Details (Optional) */}
+          <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+            <h3 className="text-lg font-semibold mb-2 text-[#1A1A1A] flex items-center">
+              <span className="bg-[#1C8C3C] text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-bold">3</span>
+              Bank Details (Optional)
+            </h3>
+            <p className="text-sm text-gray-500 mb-4">You can add these details now or update them later in your profile</p>
+
+            <div className="grid grid-cols-1 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Account Holder Name
+                  </label>
+                  <input
+                    type="text"
+                    name="bank_account_holder_name"
+                    value={formData.bank_account_holder_name}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Account Number
+                  </label>
+                  <input
+                    type="text"
+                    name="bank_account_number"
+                    value={formData.bank_account_number}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    IFSC Code
+                  </label>
+                  <input
+                    type="text"
+                    name="bank_ifsc_code"
+                    value={formData.bank_ifsc_code}
+                    onChange={handleChange}
+                    placeholder="e.g., SBIN0001234"
+                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    UPI ID
+                  </label>
+                  <input
+                    type="text"
+                    name="upi_id"
+                    value={formData.upi_id}
+                    onChange={handleChange}
+                    placeholder="e.g., username@upi"
                     className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] transition-all"
                   />
                 </div>

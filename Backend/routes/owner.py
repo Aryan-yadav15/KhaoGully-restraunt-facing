@@ -12,7 +12,9 @@ from models.schemas import (
     OrderTransaction,
     EarningsTransactionsResponse,
     PendingEarnings,
-    MonthlyEarnings
+    MonthlyEarnings,
+    UpdateBankDetailsRequest,
+    ProfileData
 )
 from utils.dependencies import get_current_user
 from database import get_dbb, get_dba
@@ -273,7 +275,7 @@ async def get_earnings_summary(current_user: dict = Depends(get_current_user)):
         # Use restaurant_id directly from current_user (already contains the UUID)
         restaurant_id = current_user["id"]
         
-        # Fetch earnings data
+        # Fetch earnings data (including commission_rate)
         result = dbb.table("restaurant_earnings_data").select("*").eq("restaurant_id", restaurant_id).execute()
         
         if not result.data:
@@ -285,7 +287,7 @@ async def get_earnings_summary(current_user: dict = Depends(get_current_user)):
                 restaurant_email=current_user.get("restaurant_email"),
                 total_lifetime_earnings=0.0,
                 total_completed_orders=0,
-                commission_rate=0.20,
+                commission_rate=0.20,  # Default commission rate
                 total_commission_paid=0.0,
                 has_bank_details=False,
                 bank_account_number=None,
@@ -343,53 +345,73 @@ async def get_earnings_transactions(
         # Use restaurant_id directly from current_user
         restaurant_id = current_user["id"]
         
-        # Build query
-        query = dbb.table("restaurant_order_transactions").select("*").eq("restaurant_id", restaurant_id)
+        # Get commission rate from restaurant_earnings_data
+        earnings_result = dbb.table("restaurant_earnings_data").select("commission_rate, pending_earnings").eq("restaurant_id", restaurant_id).execute()
+        commission_rate = 0.20  # Default
+        pending_amount = 0.0
+        if earnings_result.data:
+            commission_rate = float(earnings_result.data[0]["commission_rate"])
+            pending_amount = float(earnings_result.data[0]["pending_earnings"])
         
-        # Filter by payment status if provided
-        if is_paid is not None:
-            query = query.eq("is_paid", is_paid)
+        # Fetch orders from fetched_orders
+        query = dbb.table("fetched_orders").select("*").eq("restaurant_owner_id", restaurant_id)
         
         # Get total count
         count_result = query.execute()
         total_count = len(count_result.data) if count_result.data else 0
         
-        # Fetch transactions with pagination
-        result = query.order("order_date", desc=True).range(offset, offset + limit - 1).execute()
+        # Fetch orders with pagination
+        result = query.order("created_at", desc=True).range(offset, offset + limit - 1).execute()
+        
+        # Get order IDs to fetch responses
+        order_ids = [order["order_id"] for order in result.data] if result.data else []
+        
+        # Fetch order responses for these orders
+        responses_map = {}
+        if order_ids:
+            responses_result = dbb.table("order_responses").select("order_id, overall_status, responded_at").in_("order_id", order_ids).execute()
+            if responses_result.data:
+                responses_map = {resp["order_id"]: resp for resp in responses_result.data}
         
         transactions = []
-        if result.data:
-            for txn in result.data:
-                transactions.append(OrderTransaction(
-                    id=txn["id"],
-                    transaction_id=txn["transaction_id"],
-                    restaurant_id=txn["restaurant_id"],
-                    order_id=txn["order_id"],
-                    order_date=txn["order_date"],
-                    customer_name=txn.get("customer_name"),
-                    customer_phone=txn.get("customer_phone"),
-                    delivery_address=txn.get("delivery_address"),
-                    order_total=float(txn["order_total"]),
-                    platform_commission=float(txn["platform_commission"]),
-                    delivery_fee=float(txn["delivery_fee"]),
-                    net_amount=float(txn["net_amount"]),
-                    is_paid=txn["is_paid"],
-                    paid_at=txn.get("paid_at"),
-                    payout_cycle_id=txn.get("payout_cycle_id"),
-                    payout_reference=txn.get("payout_reference"),
-                    synced_at=txn["synced_at"]
-                ))
-        
-        # Calculate pending earnings
-        pending_result = dbb.table("restaurant_order_transactions").select(
-            "net_amount"
-        ).eq("restaurant_id", restaurant_id).eq("is_paid", False).execute()
-        
-        pending_amount = 0.0
         pending_orders = 0
-        if pending_result.data:
-            pending_amount = sum(float(item["net_amount"]) for item in pending_result.data)
-            pending_orders = len(pending_result.data)
+        if result.data:
+            for order in result.data:
+                # Convert amount from paise to rupees
+                order_total = float(order["total_amount"]) / 100.0
+                platform_commission = order_total * commission_rate
+                delivery_fee = 0.0  # No delivery fee data in fetched_orders
+                net_amount = order_total - platform_commission
+                
+                # Get order status from order_responses if available
+                order_response = responses_map.get(order["order_id"])
+                overall_status = order_response.get("overall_status") if order_response else None
+                
+                # Determine if paid (check if order is accepted and completed)
+                # For now, treat accepted orders as pending payment
+                is_paid = False  # Will be updated when actual payment system is integrated
+                if not is_paid:
+                    pending_orders += 1
+                
+                transactions.append(OrderTransaction(
+                    id=str(order["id"]),
+                    transaction_id=str(order["order_id"]),
+                    restaurant_id=restaurant_id,
+                    order_id=str(order["order_id"]),
+                    order_date=order.get("created_at", order["fetched_at"]),
+                    customer_name=order.get("customer_name"),
+                    customer_phone=order.get("customer_phone"),
+                    delivery_address=None,  # Not available in fetched_orders
+                    order_total=order_total,
+                    platform_commission=platform_commission,
+                    delivery_fee=delivery_fee,
+                    net_amount=net_amount,
+                    is_paid=is_paid,
+                    paid_at=None if not is_paid else order.get("created_at"),
+                    payout_cycle_id=None,
+                    payout_reference=None,
+                    synced_at=order["fetched_at"]
+                ))
         
         return EarningsTransactionsResponse(
             transactions=transactions,
@@ -420,18 +442,25 @@ async def get_monthly_earnings(current_user: dict = Depends(get_current_user)):
         # Use restaurant_id directly from current_user
         restaurant_id = current_user["id"]
         
-        # Fetch all transactions from the last 6 months
-        result = dbb.table("restaurant_order_transactions").select(
-            "order_date, order_total, platform_commission, net_amount"
-        ).eq("restaurant_id", restaurant_id).gte(
-            "order_date", datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        # Get commission rate from restaurant_earnings_data
+        earnings_result = dbb.table("restaurant_earnings_data").select("commission_rate").eq("restaurant_id", restaurant_id).execute()
+        commission_rate = 0.20  # Default
+        if earnings_result.data:
+            commission_rate = float(earnings_result.data[0]["commission_rate"])
+        
+        # Fetch all orders from the last 6 months
+        six_months_ago = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        result = dbb.table("fetched_orders").select(
+            "created_at, total_amount, order_status"
+        ).eq("restaurant_owner_id", restaurant_id).gte(
+            "created_at", six_months_ago.isoformat()
         ).execute()
         
         # Group by month
         monthly_data = {}
         if result.data:
-            for txn in result.data:
-                order_date = datetime.fromisoformat(txn["order_date"].replace("Z", "+00:00"))
+            for order in result.data:
+                order_date = datetime.fromisoformat(order["created_at"].replace("Z", "+00:00"))
                 month_key = order_date.strftime("%Y-%m")
                 
                 if month_key not in monthly_data:
@@ -442,10 +471,15 @@ async def get_monthly_earnings(current_user: dict = Depends(get_current_user)):
                         "net_earnings": 0.0
                     }
                 
+                # Convert from paise to rupees
+                order_total = float(order["total_amount"]) / 100.0
+                platform_commission = order_total * commission_rate
+                net_amount = order_total - platform_commission
+                
                 monthly_data[month_key]["total_orders"] += 1
-                monthly_data[month_key]["total_sales"] += float(txn["order_total"])
-                monthly_data[month_key]["total_commission"] += float(txn["platform_commission"])
-                monthly_data[month_key]["net_earnings"] += float(txn["net_amount"])
+                monthly_data[month_key]["total_sales"] += order_total
+                monthly_data[month_key]["total_commission"] += platform_commission
+                monthly_data[month_key]["net_earnings"] += net_amount
         
         # Convert to list
         monthly_earnings = []
@@ -466,4 +500,108 @@ async def get_monthly_earnings(current_user: dict = Depends(get_current_user)):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to fetch monthly earnings: {str(e)}"
+        )
+
+@router.get("/profile", response_model=ProfileData)
+async def get_profile(current_user: dict = Depends(get_current_user)):
+    """
+    Get complete profile data including bank details
+    """
+    dbb = get_dbb()
+    
+    try:
+        restaurant_id = current_user["id"]
+        
+        # Fetch bank details from restaurant_earnings_data
+        earnings_result = dbb.table("restaurant_earnings_data").select(
+            "bank_account_number, bank_ifsc_code, bank_account_holder_name, upi_id"
+        ).eq("restaurant_id", restaurant_id).execute()
+        
+        # Get bank details if they exist
+        bank_details = {}
+        if earnings_result.data:
+            bank_details = {
+                "bank_account_number": earnings_result.data[0].get("bank_account_number"),
+                "bank_ifsc_code": earnings_result.data[0].get("bank_ifsc_code"),
+                "bank_account_holder_name": earnings_result.data[0].get("bank_account_holder_name"),
+                "upi_id": earnings_result.data[0].get("upi_id")
+            }
+        
+        return ProfileData(
+            full_name=current_user["full_name"],
+            email=current_user["email"],
+            phone=current_user["phone"],
+            restaurant_name=current_user["restaurant_name"],
+            restaurant_address=current_user["restaurant_address"],
+            restaurant_phone=current_user["restaurant_phone"],
+            restaurant_email=current_user.get("restaurant_email"),
+            bank_account_number=bank_details.get("bank_account_number"),
+            bank_ifsc_code=bank_details.get("bank_ifsc_code"),
+            bank_account_holder_name=bank_details.get("bank_account_holder_name"),
+            upi_id=bank_details.get("upi_id")
+        )
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch profile: {str(e)}"
+        )
+
+@router.put("/update-bank-details", response_model=MessageResponse)
+async def update_bank_details(
+    bank_data: UpdateBankDetailsRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Update bank details in restaurant_earnings_data
+    """
+    dbb = get_dbb()
+    
+    try:
+        restaurant_id = current_user["id"]
+        
+        # Check if restaurant_earnings_data entry exists
+        result = dbb.table("restaurant_earnings_data").select("id").eq("restaurant_id", restaurant_id).execute()
+        
+        has_bank_details = bool(
+            bank_data.bank_account_number or bank_data.bank_ifsc_code or 
+            bank_data.bank_account_holder_name or bank_data.upi_id
+        )
+        
+        update_data = {
+            "bank_account_number": bank_data.bank_account_number,
+            "bank_ifsc_code": bank_data.bank_ifsc_code,
+            "bank_account_holder_name": bank_data.bank_account_holder_name,
+            "upi_id": bank_data.upi_id,
+            "has_bank_details": has_bank_details,
+            "data_sent_by": current_user["email"]
+        }
+        
+        if result.data:
+            # Update existing record
+            dbb.table("restaurant_earnings_data").update(update_data).eq("restaurant_id", restaurant_id).execute()
+        else:
+            # Create new record if it doesn't exist
+            update_data.update({
+                "restaurant_id": restaurant_id,
+                "restaurant_name": current_user["restaurant_name"],
+                "restaurant_phone": current_user["restaurant_phone"],
+                "restaurant_email": current_user.get("restaurant_email"),
+                "commission_rate": 0.20  # Default 20% commission
+            })
+            dbb.table("restaurant_earnings_data").insert(update_data).execute()
+        
+        return MessageResponse(
+            success=True,
+            message="Bank details updated successfully"
+        )
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update bank details: {str(e)}"
         )

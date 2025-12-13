@@ -32,7 +32,7 @@ async def signup(data: RestaurantOwnerSignup):
         password_hash = hash_password(data.password)
         
         # Insert new restaurant owner
-        result = dbb.table("restaurant_owners").insert({
+        owner_result = dbb.table("restaurant_owners").insert({
             "email": data.email,
             "password_hash": password_hash,
             "full_name": data.full_name,
@@ -43,6 +43,28 @@ async def signup(data: RestaurantOwnerSignup):
             "restaurant_email": data.restaurant_email,
             "approval_status": "pending"
         }).execute()
+        
+        # Create restaurant_earnings_data entry with bank details
+        if owner_result.data:
+            restaurant_id = owner_result.data[0]["id"]
+            has_bank_details = bool(
+                data.bank_account_number or data.bank_ifsc_code or 
+                data.bank_account_holder_name or data.upi_id
+            )
+            
+            dbb.table("restaurant_earnings_data").insert({
+                "restaurant_id": restaurant_id,
+                "restaurant_name": data.restaurant_name,
+                "restaurant_phone": data.restaurant_phone,
+                "restaurant_email": data.restaurant_email,
+                "commission_rate": 0.20,  # Default 20% commission
+                "has_bank_details": has_bank_details,
+                "bank_account_number": data.bank_account_number,
+                "bank_ifsc_code": data.bank_ifsc_code,
+                "bank_account_holder_name": data.bank_account_holder_name,
+                "upi_id": data.upi_id,
+                "data_sent_by": data.email
+            }).execute()
         
         return MessageResponse(
             success=True,

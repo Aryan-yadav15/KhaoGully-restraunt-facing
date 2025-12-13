@@ -15,6 +15,10 @@ class RestaurantOwnerSignup(BaseModel):
     restaurant_address: str
     restaurant_phone: str
     restaurant_email: Optional[str] = None
+    bank_account_number: Optional[str] = None
+    bank_ifsc_code: Optional[str] = None
+    bank_account_holder_name: Optional[str] = None
+    upi_id: Optional[str] = None
 
 class LoginRequest(BaseModel):
     email: EmailStr
@@ -134,10 +138,10 @@ class EarningsSummary(BaseModel):
     sync_status: str
 
 class OrderTransaction(BaseModel):
-    id: int
+    id: str
     transaction_id: str
     restaurant_id: str
-    order_id: int
+    order_id: str
     order_date: datetime
     customer_name: Optional[str]
     customer_phone: Optional[str]
@@ -167,4 +171,23 @@ class EarningsTransactionsResponse(BaseModel):
     transactions: List[OrderTransaction]
     total_count: int
     pending_earnings: PendingEarnings
+
+class UpdateBankDetailsRequest(BaseModel):
+    bank_account_number: Optional[str] = None
+    bank_ifsc_code: Optional[str] = None
+    bank_account_holder_name: Optional[str] = None
+    upi_id: Optional[str] = None
+
+class ProfileData(BaseModel):
+    full_name: str
+    email: str
+    phone: str
+    restaurant_name: str
+    restaurant_address: str
+    restaurant_phone: str
+    restaurant_email: Optional[str]
+    bank_account_number: Optional[str]
+    bank_ifsc_code: Optional[str]
+    bank_account_holder_name: Optional[str]
+    upi_id: Optional[str]
 
