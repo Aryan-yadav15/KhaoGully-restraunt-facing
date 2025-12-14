@@ -93,14 +93,14 @@ const AdminDashboard = () => {
     <div className="max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-4xl font-bold text-[#1A1A1A]">Admin Dashboard</h1>
+          <h1 className="text-4xl font-bold text-secondary">Admin Dashboard</h1>
           <p className="text-gray-500 mt-2">Manage restaurant owners and approvals</p>
         </div>
-        <div className="bg-white p-1 rounded-lg shadow-sm border border-gray-200 flex">
+        <div className="glass-panel p-1 rounded-lg flex">
           <button
             onClick={() => setFilter('all')}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-              filter === 'all' ? 'bg-[#1A1A1A] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'
+              filter === 'all' ? 'bg-secondary text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'
             }`}
           >
             All <span className="ml-1 bg-white/50 px-1.5 py-0.5 rounded-full text-xs">{(owners || []).length}</span>
@@ -147,7 +147,7 @@ const AdminDashboard = () => {
       )}
 
       {/* Owners Table */}
-      <div className="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
+      <div className="glass-panel shadow-xl rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50/50">
@@ -182,10 +182,10 @@ const AdminDashboard = () => {
                 </tr>
               ) : (
                 filteredOwners.map((owner) => (
-                  <tr key={owner.id} className="hover:bg-[#1C8C3C]/5 transition-colors">
+                  <tr key={owner.id} className="hover:bg-primary/5 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center">
-                        <div className="h-10 w-10 rounded-full bg-[#1C8C3C] flex items-center justify-center text-white font-bold text-lg shadow-sm">
+                        <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-lg shadow-sm">
                           {owner.full_name.charAt(0).toUpperCase()}
                         </div>
                         <div className="ml-4">
@@ -226,7 +226,7 @@ const AdminDashboard = () => {
                             <select
                               value={selectedRestaurant}
                               onChange={(e) => setSelectedRestaurant(e.target.value)}
-                              className="text-sm border border-gray-300 rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] outline-none"
+                              className="text-sm w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-accent focus:border-primary"
                               autoFocus
                             >
                               <option value="">Select Restaurant</option>
@@ -249,7 +249,7 @@ const AdminDashboard = () => {
                               setSelectedOwner(owner.id);
                               setSelectedRestaurant(owner.restaurant_uid || '');
                             }}
-                            className="text-[#1C8C3C] hover:text-[#157030] text-sm font-medium hover:underline flex items-center"
+                            className="text-primary hover:text-primary-dark text-sm font-medium hover:underline flex items-center"
                           >
                             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                             {owner.restaurant_uid ? 'Change UID' : 'Assign UID'}
@@ -274,7 +274,7 @@ const AdminDashboard = () => {
                                   setSelectedOwner(owner.id);
                                 }
                               }}
-                              className="text-[#1C8C3C] hover:text-[#157030] bg-[#1C8C3C]/10 hover:bg-[#1C8C3C]/20 px-3 py-1.5 rounded-md transition-colors"
+                              className="text-primary hover:text-primary-dark bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-md transition-colors"
                             >
                               Approve
                             </button>
@@ -295,7 +295,7 @@ const AdminDashboard = () => {
                                 setSelectedOwner(owner.id);
                               }
                             }}
-                            className="text-[#1C8C3C] hover:text-[#157030] bg-[#1C8C3C]/10 hover:bg-[#1C8C3C]/20 px-3 py-1.5 rounded-md transition-colors"
+                            className="text-primary hover:text-primary-dark bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-md transition-colors"
                           >
                             Assign UID
                           </button>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { earningsService } from '../../services/earnings';
-import { OrderTransaction, EarningsTransactionsResponse } from '../../types/earnings.types';
+import { EarningsTransactionsResponse } from '../../types/earnings.types';
 
 const TransactionHistory: React.FC = () => {
   const navigate = useNavigate();
@@ -63,7 +63,7 @@ const TransactionHistory: React.FC = () => {
   if (loading && !data) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl">Loading transactions...</div>
+        <div className="text-xl text-gray-600">Loading transactions...</div>
       </div>
     );
   }
@@ -74,7 +74,7 @@ const TransactionHistory: React.FC = () => {
         <div className="text-red-600 text-xl mb-4">{error}</div>
         <button
           onClick={fetchTransactions}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="btn-primary px-6 py-2"
         >
           Retry
         </button>
@@ -83,19 +83,19 @@ const TransactionHistory: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
         <button
           onClick={() => navigate('/earnings')}
-          className="mb-4 text-blue-600 hover:text-blue-700 flex items-center"
+          className="mb-4 text-primary hover:text-primary-dark flex items-center"
         >
           <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           Back to Dashboard
         </button>
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Transaction History</h1>
+        <h1 className="text-3xl font-bold text-secondary mb-2">Transaction History</h1>
         <p className="text-gray-600">
           View all your order transactions and payout details
         </p>
@@ -127,7 +127,7 @@ const TransactionHistory: React.FC = () => {
           onClick={() => handleFilterChange('all')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             filter === 'all'
-              ? 'bg-blue-600 text-white'
+              ? 'bg-secondary text-white'
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
           }`}
         >
@@ -137,7 +137,7 @@ const TransactionHistory: React.FC = () => {
           onClick={() => handleFilterChange('paid')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             filter === 'paid'
-              ? 'bg-green-600 text-white'
+              ? 'bg-primary text-white'
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
           }`}
         >
@@ -156,7 +156,7 @@ const TransactionHistory: React.FC = () => {
       </div>
 
       {/* Transactions Table */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="glass-panel rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -210,12 +210,12 @@ const TransactionHistory: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 text-right">
                       -{formatCurrency(transaction.platform_commission)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-semibold text-right">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-primary font-semibold text-right">
                       {formatCurrency(transaction.net_amount)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       {transaction.is_paid ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
                           Paid
                         </span>
                       ) : (
@@ -233,7 +233,7 @@ const TransactionHistory: React.FC = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
                     No transactions found
                   </td>
                 </tr>

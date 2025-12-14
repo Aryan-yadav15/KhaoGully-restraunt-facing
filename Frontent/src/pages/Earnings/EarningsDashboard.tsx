@@ -83,7 +83,7 @@ const EarningsDashboard: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Earnings Dashboard</h1>
+        <h1 className="text-3xl font-bold text-secondary mb-2">Earnings Dashboard</h1>
         <p className="text-gray-600">
           Last synced: {formatDate(summary.last_synced_at)}
         </p>
@@ -92,7 +92,7 @@ const EarningsDashboard: React.FC = () => {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {/* Total Lifetime Earnings */}
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white">
+        <div className="bg-gradient-to-br from-primary to-primary-dark rounded-lg shadow-lg p-6 text-white card-hover">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium opacity-90">Total Lifetime Earnings</h3>
             <svg className="w-8 h-8 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,7 +104,7 @@ const EarningsDashboard: React.FC = () => {
         </div>
 
         {/* Pending Earnings */}
-        <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg shadow-lg p-6 text-white">
+        <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg shadow-lg p-6 text-white card-hover">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium opacity-90">Pending Earnings</h3>
             <svg className="w-8 h-8 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,7 +120,7 @@ const EarningsDashboard: React.FC = () => {
         </div>
 
         {/* Total Orders */}
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white card-hover">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium opacity-90">Completed Orders</h3>
             <svg className="w-8 h-8 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,7 +132,7 @@ const EarningsDashboard: React.FC = () => {
         </div>
 
         {/* Commission Info */}
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 text-white card-hover">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium opacity-90">Platform Commission</h3>
             <svg className="w-8 h-8 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,8 +147,8 @@ const EarningsDashboard: React.FC = () => {
       </div>
 
       {/* Bank Details Section */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+      <div className="glass-panel rounded-lg p-6 mb-8">
+        <h2 className="text-xl font-semibold text-secondary mb-4 flex items-center">
           <svg className="w-6 h-6 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
           </svg>
@@ -159,19 +159,19 @@ const EarningsDashboard: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-gray-600">Account Holder Name</p>
-              <p className="text-gray-800 font-medium">{summary.bank_account_holder_name || 'N/A'}</p>
+              <p className="text-secondary font-medium">{summary.bank_account_holder_name || 'N/A'}</p>
             </div>
             <div>
               <p className="text-sm text-gray-600">Account Number</p>
-              <p className="text-gray-800 font-medium">{summary.bank_account_number || 'N/A'}</p>
+              <p className="text-secondary font-medium">{summary.bank_account_number || 'N/A'}</p>
             </div>
             <div>
               <p className="text-sm text-gray-600">IFSC Code</p>
-              <p className="text-gray-800 font-medium">{summary.bank_ifsc_code || 'N/A'}</p>
+              <p className="text-secondary font-medium">{summary.bank_ifsc_code || 'N/A'}</p>
             </div>
             <div>
               <p className="text-sm text-gray-600">UPI ID</p>
-              <p className="text-gray-800 font-medium">{summary.upi_id || 'N/A'}</p>
+              <p className="text-secondary font-medium">{summary.upi_id || 'N/A'}</p>
             </div>
           </div>
         ) : (
@@ -187,7 +187,7 @@ const EarningsDashboard: React.FC = () => {
       <div className="flex gap-4">
         <button
           onClick={() => navigate('/earnings/transactions')}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-md transition-colors"
+          className="btn-primary shadow-md"
         >
           View Transaction History
         </button>

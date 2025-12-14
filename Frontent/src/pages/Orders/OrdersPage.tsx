@@ -152,9 +152,6 @@ const OrdersPage = () => {
       });
       setIndividualOrders(updatedOrders);
 
-      // Check if all orders have been responded to
-      const allResponded = updatedOrders.every(order => order.responded);
-      
       // Keep displaying even when all orders are processed
       // Don't reset or clear anything
       
@@ -167,10 +164,10 @@ const OrdersPage = () => {
 
   return (
     <div className="max-w-7xl mx-auto pb-12">
-      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-8">
+      <div className="glass-panel rounded-2xl p-8 mb-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <div>
-            <h1 className="text-4xl font-bold text-[#1A1A1A] mb-2">Orders Dashboard</h1>
+            <h1 className="text-4xl font-bold text-secondary mb-2">Orders Dashboard</h1>
             <p className="text-gray-500">Manage your incoming orders</p>
           </div>
           <div className="mt-4 md:mt-0 flex items-center gap-4">
@@ -183,9 +180,9 @@ const OrdersPage = () => {
               </svg>
               Order History
             </Link>
-            <div className="inline-block bg-[#1C8C3C]/10 px-4 py-2 rounded-lg border border-[#1C8C3C]/20">
-              <p className="text-sm text-[#1C8C3C] font-semibold">{user?.restaurant_name || 'N/A'}</p>
-              <p className="text-xs text-[#1C8C3C]/70">{user?.full_name || 'N/A'}</p>
+            <div className="inline-block bg-primary/10 px-4 py-2 rounded-lg border border-primary/20">
+              <p className="text-sm text-primary font-semibold">{user?.restaurant_name || 'N/A'}</p>
+              <p className="text-xs text-primary/70">{user?.full_name || 'N/A'}</p>
             </div>
           </div>
         </div>
@@ -200,7 +197,7 @@ const OrdersPage = () => {
               <button
                 onClick={handleCheckOrders}
                 disabled={loading}
-                className="bg-[#1C8C3C] hover:bg-[#157030] text-white px-8 py-3.5 rounded-xl text-lg font-semibold shadow-lg shadow-[#1C8C3C]/30 transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed"
+                className="btn-primary px-8 py-3.5 text-lg shadow-lg shadow-primary/30 transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 Check for New Orders
               </button>
@@ -209,8 +206,8 @@ const OrdersPage = () => {
           
           {loading && (
             <div className="text-center py-12">
-              <div className="inline-flex items-center px-4 py-2 font-semibold leading-6 text-[#1C8C3C] transition ease-in-out duration-150 cursor-not-allowed">
-                <svg className="animate-spin -ml-1 mr-3 h-8 w-8 text-[#1C8C3C]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <div className="inline-flex items-center px-4 py-2 font-semibold leading-6 text-primary transition ease-in-out duration-150 cursor-not-allowed">
+                <svg className="animate-spin -ml-1 mr-3 h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
@@ -238,13 +235,13 @@ const OrdersPage = () => {
       {hasOrders && cumulativeItems && cumulativeItems.length > 0 && (
         <div className="space-y-8 animate-fade-in-up">
           {/* Timestamp and Countdown Display */}
-          <div className="bg-gradient-to-r from-[#1C8C3C]/10 to-blue-50 rounded-2xl border border-[#1C8C3C]/20 p-6">
+          <div className="bg-gradient-to-r from-primary/10 to-blue-50 rounded-2xl border border-primary/20 p-6">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               {/* Refresh Button */}
               <button
                 onClick={handleCheckOrders}
                 disabled={loading}
-                className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 rounded-lg border border-[#1C8C3C]/30 text-[#1C8C3C] font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 rounded-lg border border-primary/30 text-primary font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Check for new orders"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -256,7 +253,7 @@ const OrdersPage = () => {
               {/* Orders Received Time */}
               <div className="flex items-center gap-3">
                 <div className="bg-white p-3 rounded-lg shadow-sm">
-                  <svg className="w-6 h-6 text-[#1C8C3C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>

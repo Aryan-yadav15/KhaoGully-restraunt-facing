@@ -71,17 +71,17 @@ const Login = () => {
 
   return (
     <div className="max-w-md mx-auto mt-12">
-      <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+      <div className="glass-panel p-8 rounded-2xl">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-[#1C8C3C] rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/20">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
           </div>
-          <h2 className="text-2xl font-bold text-[#1A1A1A] mb-1">Welcome Back</h2>
+          <h2 className="text-2xl font-bold text-secondary mb-1">Welcome Back</h2>
           <p className="text-gray-500">Restaurant Owner Login</p>
         </div>
 
         {message && (
-          <div className="bg-[#1C8C3C]/10 border border-[#1C8C3C]/30 text-[#1C8C3C] px-4 py-3 rounded-lg mb-6 flex items-center">
+          <div className="bg-primary/10 border border-primary/30 text-primary px-4 py-3 rounded-lg mb-6 flex items-center">
             <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
             {message}
           </div>
@@ -96,28 +96,28 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
+            <label className="block text-sm font-semibold text-secondary mb-2">
               Email Address
             </label>
             <input
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-3 bg-[#F5F5F5] border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/30 focus:border-[#1C8C3C] transition-all"
+              className="input-field"
               placeholder="you@example.com"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
+            <label className="block text-sm font-semibold text-secondary mb-2">
               Password
             </label>
             <input
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full px-4 py-3 bg-[#F5F5F5] border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/30 focus:border-[#1C8C3C] transition-all"
+              className="input-field"
               placeholder="••••••••"
               required
             />
@@ -129,7 +129,7 @@ const Login = () => {
             className={`w-full py-3.5 px-4 rounded-lg text-white font-semibold transition-all duration-200 active:scale-[0.98] ${
               loading
                 ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-[#1C8C3C] hover:bg-[#157030]'
+                : 'btn-primary'
             }`}
           >
             {loading ? (
@@ -149,14 +149,14 @@ const Login = () => {
         <div className="mt-8 text-center">
           <p className="text-gray-600">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-[#1C8C3C] hover:text-[#157030] font-semibold">
+            <Link to="/signup" className="text-primary hover:text-primary-dark font-semibold">
               Sign up here
             </Link>
           </p>
         </div>
 
         <div className="mt-6 text-center">
-          <Link to="/admin/login" className="text-sm text-gray-400 hover:text-[#1A1A1A] transition-colors">
+          <Link to="/admin/login" className="text-sm text-gray-400 hover:text-secondary transition-colors">
             Admin Login
           </Link>
         </div>

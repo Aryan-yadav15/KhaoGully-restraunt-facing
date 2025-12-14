@@ -36,8 +36,8 @@ const OrderHistory = () => {
     switch (status) {
       case 'accepted':
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[#1C8C3C]/10 text-[#1C8C3C] border border-[#1C8C3C]/20">
-            <span className="w-1.5 h-1.5 bg-[#1C8C3C] rounded-full mr-1.5"></span>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+            <span className="w-1.5 h-1.5 bg-primary rounded-full mr-1.5"></span>
             Accepted
           </span>
         );
@@ -101,7 +101,7 @@ const OrderHistory = () => {
       <div className="max-w-7xl mx-auto pb-12">
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
-            <svg className="animate-spin h-12 w-12 text-[#1C8C3C] mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg className="animate-spin h-12 w-12 text-primary mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
@@ -115,7 +115,7 @@ const OrderHistory = () => {
   return (
     <div className="max-w-7xl mx-auto pb-12">
       {/* Header */}
-      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-8">
+      <div className="glass-panel rounded-2xl p-8 mb-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <div className="flex items-center gap-4">
             <Link
@@ -128,7 +128,7 @@ const OrderHistory = () => {
               </svg>
             </Link>
             <div>
-              <h1 className="text-4xl font-bold text-[#1A1A1A] mb-2">Order History</h1>
+              <h1 className="text-4xl font-bold text-secondary mb-2">Order History</h1>
               <p className="text-gray-500">View all your past orders</p>
             </div>
           </div>
@@ -147,11 +147,11 @@ const OrderHistory = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
             <p className="text-sm text-gray-500 mb-1">Total Orders</p>
-            <p className="text-3xl font-bold text-[#1A1A1A]">{stats.total}</p>
+            <p className="text-3xl font-bold text-secondary">{stats.total}</p>
           </div>
-          <div className="bg-[#1C8C3C]/5 rounded-xl p-4 border border-[#1C8C3C]/10">
-            <p className="text-sm text-[#1C8C3C] mb-1">Accepted</p>
-            <p className="text-3xl font-bold text-[#1C8C3C]">{stats.accepted}</p>
+          <div className="bg-primary/5 rounded-xl p-4 border border-primary/10">
+            <p className="text-sm text-primary mb-1">Accepted</p>
+            <p className="text-3xl font-bold text-primary">{stats.accepted}</p>
           </div>
           <div className="bg-red-50 rounded-xl p-4 border border-red-100">
             <p className="text-sm text-red-600 mb-1">Rejected</p>
@@ -174,12 +174,12 @@ const OrderHistory = () => {
       )}
 
       {/* Filter Tabs */}
-      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mb-6">
+      <div className="glass-panel rounded-2xl p-6 mb-6">
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setFilter('all')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              filter === 'all' ? 'bg-[#1A1A1A] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              filter === 'all' ? 'bg-secondary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
             All Orders ({stats.total})
@@ -187,7 +187,7 @@ const OrderHistory = () => {
           <button
             onClick={() => setFilter('accepted')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              filter === 'accepted' ? 'bg-[#1C8C3C] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              filter === 'accepted' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
             Accepted ({stats.accepted})
@@ -212,7 +212,7 @@ const OrderHistory = () => {
       </div>
 
       {/* Orders List */}
-      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+      <div className="glass-panel rounded-2xl overflow-hidden">
         {filteredOrders.length === 0 ? (
           <div className="text-center py-16">
             <svg className="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -238,7 +238,7 @@ const OrderHistory = () => {
                       {order.payment_status && (
                         <span className={`px-2 py-1 text-xs font-medium rounded ${
                           order.payment_status === 'paid' 
-                            ? 'bg-green-50 text-green-700' 
+                            ? 'bg-primary/10 text-primary' 
                             : 'bg-yellow-50 text-yellow-700'
                         }`}>
                           {order.payment_status.toUpperCase()}
@@ -281,7 +281,7 @@ const OrderHistory = () => {
                   {/* Total */}
                   <div className="lg:text-right">
                     <p className="text-sm text-gray-500 mb-1">Total Amount</p>
-                    <p className="text-2xl font-bold text-[#1A1A1A]">{formatPrice(order.total_amount)}</p>
+                    <p className="text-2xl font-bold text-secondary">{formatPrice(order.total_amount)}</p>
                   </div>
                 </div>
 
@@ -289,18 +289,11 @@ const OrderHistory = () => {
                 {order.response && (
                   <div className="mt-4 pt-4 border-t border-gray-100">
                     <p className="text-xs text-gray-500 mb-2">Response Details:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {order.response.item_responses?.map((item, idx) => (
-                        <span key={idx} className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                          item.status === 'accepted' 
-                            ? 'bg-green-50 text-green-700' 
-                            : item.status === 'rejected'
-                            ? 'bg-red-50 text-red-700'
-                            : 'bg-yellow-50 text-yellow-700'
-                        }`}>
-                          {item.item_name}: {item.accepted_qty} accepted, {item.rejected_qty} rejected
-                        </span>
-                      ))}
+                    <div className="text-xs text-gray-600">
+                      Status: <span className="font-medium">{order.response.overall_status}</span>
+                      {order.response.responded_at && (
+                        <span className="ml-3">Responded at: {formatDate(order.response.responded_at)}</span>
+                      )}
                     </div>
                   </div>
                 )}

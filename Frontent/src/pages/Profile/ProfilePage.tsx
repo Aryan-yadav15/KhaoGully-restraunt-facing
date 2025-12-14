@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { authService } from '../../services/auth';
 import { ownerService } from '../../services/owner';
 
 interface ProfileData {
@@ -97,7 +96,7 @@ const ProfilePage = () => {
   return (
     <div className="max-w-5xl mx-auto p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#1A1A1A]">Profile Settings</h1>
+        <h1 className="text-3xl font-bold text-secondary">Profile Settings</h1>
         <p className="text-gray-500 mt-2">Manage your account and restaurant information</p>
       </div>
 
@@ -121,9 +120,9 @@ const ProfilePage = () => {
 
       <div className="space-y-6">
         {/* Personal Information */}
-        <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold mb-4 text-[#1A1A1A] flex items-center">
-            <svg className="w-6 h-6 mr-2 text-[#1C8C3C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="glass-panel rounded-xl p-6">
+          <h2 className="text-xl font-semibold mb-4 text-secondary flex items-center">
+            <svg className="w-6 h-6 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
             Personal Information
@@ -163,9 +162,9 @@ const ProfilePage = () => {
         </div>
 
         {/* Restaurant Information */}
-        <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold mb-4 text-[#1A1A1A] flex items-center">
-            <svg className="w-6 h-6 mr-2 text-[#1C8C3C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="glass-panel rounded-xl p-6">
+          <h2 className="text-xl font-semibold mb-4 text-secondary flex items-center">
+            <svg className="w-6 h-6 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
             Restaurant Information
@@ -215,9 +214,9 @@ const ProfilePage = () => {
         </div>
 
         {/* Bank Details */}
-        <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold mb-4 text-[#1A1A1A] flex items-center">
-            <svg className="w-6 h-6 mr-2 text-[#1C8C3C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="glass-panel rounded-xl p-6">
+          <h2 className="text-xl font-semibold mb-4 text-secondary flex items-center">
+            <svg className="w-6 h-6 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
             </svg>
             Bank Details
@@ -231,7 +230,7 @@ const ProfilePage = () => {
                 name="bank_account_holder_name"
                 value={profileData.bank_account_holder_name}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] transition-all"
+                className="input-field"
                 placeholder="Enter account holder name"
               />
             </div>
@@ -242,7 +241,7 @@ const ProfilePage = () => {
                 name="bank_account_number"
                 value={profileData.bank_account_number}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] transition-all"
+                className="input-field"
                 placeholder="Enter account number"
               />
             </div>
@@ -253,7 +252,7 @@ const ProfilePage = () => {
                 name="bank_ifsc_code"
                 value={profileData.bank_ifsc_code}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] transition-all"
+                className="input-field"
                 placeholder="e.g., SBIN0001234"
               />
             </div>
@@ -264,7 +263,7 @@ const ProfilePage = () => {
                 name="upi_id"
                 value={profileData.upi_id}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] transition-all"
+                className="input-field"
                 placeholder="e.g., username@upi"
               />
             </div>
@@ -276,7 +275,7 @@ const ProfilePage = () => {
               className={`px-6 py-3 rounded-lg text-white font-semibold transition-all ${
                 saving
                   ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-[#1C8C3C] hover:bg-[#157030] shadow-lg shadow-[#1C8C3C]/30'
+                  : 'btn-primary'
               }`}
             >
               {saving ? 'Saving...' : 'Save Bank Details'}

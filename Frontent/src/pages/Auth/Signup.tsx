@@ -96,12 +96,12 @@ const Signup = () => {
 
   return (
     <div className="max-w-3xl mx-auto mt-10 mb-10">
-      <div className="bg-white p-8 md:p-10 rounded-2xl shadow-xl border border-gray-100">
+      <div className="glass-panel p-8 md:p-10 rounded-2xl">
         <div className="text-center mb-10">
-          <div className="w-16 h-16 bg-[#1C8C3C] rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/20">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
           </div>
-          <h2 className="text-3xl font-bold text-[#1A1A1A] mb-2">Create Account</h2>
+          <h2 className="text-3xl font-bold text-secondary mb-2">Create Account</h2>
           <p className="text-gray-500">Join KhaoGully as a Restaurant Owner</p>
         </div>
 
@@ -114,9 +114,9 @@ const Signup = () => {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Personal Details */}
-          <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-            <h3 className="text-lg font-semibold mb-4 text-[#1A1A1A] flex items-center">
-              <span className="bg-[#1C8C3C] text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-bold">1</span>
+          <div className="bg-gray-50/80 p-6 rounded-xl border border-gray-200">
+            <h3 className="text-lg font-semibold mb-4 text-secondary flex items-center">
+              <span className="bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-bold shadow-sm">1</span>
               Personal Details
             </h3>
             
@@ -130,7 +130,7 @@ const Signup = () => {
                   name="full_name"
                   value={formData.full_name}
                   onChange={handleChange}
-                  className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] transition-all"
+                  className="input-field"
                   required
                 />
               </div>
@@ -145,7 +145,7 @@ const Signup = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] transition-all"
+                    className="input-field"
                     required
                   />
                 </div>
@@ -159,7 +159,7 @@ const Signup = () => {
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="10-digit number"
-                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] transition-all"
+                    className="input-field"
                     required
                   />
                 </div>
@@ -175,7 +175,7 @@ const Signup = () => {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Min 8 characters"
-                  className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] transition-all"
+                  className="input-field"
                   required
                 />
               </div>
@@ -183,9 +183,9 @@ const Signup = () => {
           </div>
 
           {/* Restaurant Details */}
-          <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-            <h3 className="text-lg font-semibold mb-4 text-[#1A1A1A] flex items-center">
-              <span className="bg-[#1C8C3C] text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-bold">2</span>
+          <div className="bg-gray-50/80 p-6 rounded-xl border border-gray-200">
+            <h3 className="text-lg font-semibold mb-4 text-secondary flex items-center">
+              <span className="bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-bold shadow-sm">2</span>
               Restaurant Details
             </h3>
 
@@ -199,7 +199,7 @@ const Signup = () => {
                   name="restaurant_name"
                   value={formData.restaurant_name}
                   onChange={handleChange}
-                  className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] transition-all"
+                  className="input-field"
                   required
                 />
               </div>
@@ -213,7 +213,7 @@ const Signup = () => {
                   value={formData.restaurant_address}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] transition-all"
+                  className="input-field"
                   required
                 />
               </div>
@@ -229,7 +229,7 @@ const Signup = () => {
                     value={formData.restaurant_phone}
                     onChange={handleChange}
                     placeholder="10-digit number"
-                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] transition-all"
+                    className="input-field"
                     required
                   />
                 </div>
@@ -242,7 +242,7 @@ const Signup = () => {
                     name="restaurant_email"
                     value={formData.restaurant_email}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] transition-all"
+                    className="input-field"
                   />
                 </div>
               </div>
@@ -250,9 +250,9 @@ const Signup = () => {
           </div>
 
           {/* Bank Details (Optional) */}
-          <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-            <h3 className="text-lg font-semibold mb-2 text-[#1A1A1A] flex items-center">
-              <span className="bg-[#1C8C3C] text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-bold">3</span>
+          <div className="bg-gray-50/80 p-6 rounded-xl border border-gray-200">
+            <h3 className="text-lg font-semibold mb-2 text-secondary flex items-center">
+              <span className="bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-bold shadow-sm">3</span>
               Bank Details (Optional)
             </h3>
             <p className="text-sm text-gray-500 mb-4">You can add these details now or update them later in your profile</p>
@@ -268,7 +268,7 @@ const Signup = () => {
                     name="bank_account_holder_name"
                     value={formData.bank_account_holder_name}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] transition-all"
+                    className="input-field"
                   />
                 </div>
                 <div>
@@ -280,7 +280,7 @@ const Signup = () => {
                     name="bank_account_number"
                     value={formData.bank_account_number}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] transition-all"
+                    className="input-field"
                   />
                 </div>
               </div>
@@ -296,7 +296,7 @@ const Signup = () => {
                     value={formData.bank_ifsc_code}
                     onChange={handleChange}
                     placeholder="e.g., SBIN0001234"
-                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] transition-all"
+                    className="input-field"
                   />
                 </div>
                 <div>
@@ -309,7 +309,7 @@ const Signup = () => {
                     value={formData.upi_id}
                     onChange={handleChange}
                     placeholder="e.g., username@upi"
-                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C8C3C]/20 focus:border-[#1C8C3C] transition-all"
+                    className="input-field"
                   />
                 </div>
               </div>
@@ -322,7 +322,7 @@ const Signup = () => {
             className={`w-full py-4 px-4 rounded-xl text-white font-semibold shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0 ${
               loading
                 ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-[#1C8C3C] hover:bg-[#157030] shadow-[#1C8C3C]/30'
+                : 'btn-primary'
             }`}
           >
             {loading ? (
@@ -342,7 +342,7 @@ const Signup = () => {
         <div className="mt-8 text-center">
           <p className="text-gray-600">
             Already have an account?{' '}
-            <Link to="/login" className="text-[#1C8C3C] hover:text-[#157030] font-semibold hover:underline">
+            <Link to="/login" className="text-primary hover:text-primary-dark font-semibold hover:underline">
               Login here
             </Link>
           </p>

@@ -45,12 +45,12 @@ const AdminLogin = () => {
 
   return (
     <div className="max-w-md mx-auto mt-12">
-      <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+      <div className="glass-panel p-8 rounded-2xl">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-[#1A1A1A] rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-secondary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-black/10">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
           </div>
-          <h2 className="text-2xl font-bold text-[#1A1A1A] mb-1">Admin Portal</h2>
+          <h2 className="text-2xl font-bold text-secondary mb-1">Admin Portal</h2>
           <p className="text-gray-500">Secure Access Only</p>
         </div>
 
@@ -63,28 +63,28 @@ const AdminLogin = () => {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
+            <label className="block text-sm font-semibold text-secondary mb-2">
               Admin Email
             </label>
             <input
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-3 bg-[#F5F5F5] border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1A1A1A]/20 focus:border-[#1A1A1A] transition-all"
+              className="input-field"
               placeholder="admin@khaogully.com"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
+            <label className="block text-sm font-semibold text-secondary mb-2">
               Password
             </label>
             <input
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full px-4 py-3 bg-[#F5F5F5] border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1A1A1A]/20 focus:border-[#1A1A1A] transition-all"
+              className="input-field"
               placeholder="••••••••"
               required
             />
@@ -96,7 +96,7 @@ const AdminLogin = () => {
             className={`w-full py-3.5 px-4 rounded-lg text-white font-semibold transition-all duration-200 active:scale-[0.98] ${
               loading
                 ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-[#1A1A1A] hover:bg-black'
+                : 'btn-secondary'
             }`}
           >
             {loading ? (
@@ -114,7 +114,7 @@ const AdminLogin = () => {
         </form>
 
         <div className="mt-8 text-center">
-          <Link to="/login" className="text-sm text-gray-500 hover:text-[#1C8C3C] transition-colors">
+          <Link to="/login" className="text-sm text-gray-500 hover:text-primary transition-colors">
             ← Back to Restaurant Owner Login
           </Link>
         </div>

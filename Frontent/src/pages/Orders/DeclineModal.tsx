@@ -35,15 +35,15 @@ const DeclineModal: React.FC<DeclineModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+      <div className="glass-panel rounded-2xl p-8 max-w-md w-full shadow-2xl">
         <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-[#1C8C3C]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-[#1C8C3C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <h3 className="text-xl font-bold text-[#1A1A1A] mb-1">Partial Decline</h3>
-          <p className="text-gray-500">How many <span className="font-semibold text-[#1A1A1A]">"{itemName}"</span> to decline?</p>
+          <h3 className="text-xl font-bold text-secondary mb-1">Partial Decline</h3>
+          <p className="text-gray-500">How many <span className="font-semibold text-secondary">"{itemName}"</span> to decline?</p>
         </div>
 
         <div className="bg-gray-50 rounded-xl p-6 mb-6">
@@ -96,9 +96,9 @@ const DeclineModal: React.FC<DeclineModalProps> = ({
 
           {/* Summary */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-[#1C8C3C]/10 rounded-lg p-4 border border-[#1C8C3C]/20 text-center">
-              <p className="text-xs text-[#1C8C3C] mb-1 font-medium">ACCEPTING</p>
-              <p className="text-2xl font-bold text-[#1C8C3C]">{acceptingQuantity}</p>
+            <div className="bg-primary/10 rounded-lg p-4 border border-primary/20 text-center">
+              <p className="text-xs text-primary mb-1 font-medium">ACCEPTING</p>
+              <p className="text-2xl font-bold text-primary">{acceptingQuantity}</p>
             </div>
             <div className="bg-red-50 rounded-lg p-4 border border-red-100 text-center">
               <p className="text-xs text-red-600 mb-1 font-medium">DECLINING</p>
@@ -114,7 +114,7 @@ const DeclineModal: React.FC<DeclineModalProps> = ({
             <div className="flex justify-center space-x-2">
               <button
                 onClick={() => setDeclineQuantity(0)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${declineQuantity === 0 ? 'bg-[#1C8C3C] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${declineQuantity === 0 ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
               >
                 None
               </button>
@@ -145,7 +145,7 @@ const DeclineModal: React.FC<DeclineModalProps> = ({
           </button>
           <button
             onClick={() => onConfirm(declineQuantity)}
-            className="flex-1 bg-[#1C8C3C] hover:bg-[#157030] text-white py-3 rounded-xl font-semibold shadow-lg shadow-[#1C8C3C]/30 transition-all"
+            className="flex-1 bg-primary hover:bg-primary-dark text-white py-3 rounded-xl font-semibold shadow-lg shadow-primary/30 transition-all"
           >
             Confirm
           </button>

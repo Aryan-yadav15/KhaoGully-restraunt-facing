@@ -20,6 +20,7 @@ class OrderItem(BaseModel):
 class IncomingOrder(BaseModel):
     order_id: str
     restaurant_id: str
+    restaurant_phone: Optional[str] = None
     customer_name: str
     customer_phone: str
     items: List[dict]  # Raw items from DBA
@@ -76,14 +77,15 @@ async def receive_orders(
                 skipped_count += 1
                 continue
             
-            # Find restaurant_owner_id by restaurant_uid
-            owner_result = dbb.table("restaurant_owners").select("id").eq(
-                "restaurant_uid", order.restaurant_id
-            ).execute()
-            
+            # Find restaurant_owner_id by restaurant_phone
             restaurant_owner_id = None
-            if owner_result.data:
-                restaurant_owner_id = owner_result.data[0]["id"]
+            if order.restaurant_phone:
+                owner_result = dbb.table("restaurant_owners").select("id").eq(
+                    "restaurant_phone", order.restaurant_phone
+                ).execute()
+                
+                if owner_result.data:
+                    restaurant_owner_id = owner_result.data[0]["id"]
             
             # Insert order into fetched_orders
             dbb.table("fetched_orders").insert({
@@ -91,6 +93,7 @@ async def receive_orders(
                 "order_id": order.order_id,
                 "customer_name": order.customer_name,
                 "customer_phone": order.customer_phone,
+                "restaurant_phone": order.restaurant_phone,
                 "items": order.items,
                 "total_amount": order.total_amount,
                 "payment_status": order.payment_status,
@@ -145,14 +148,15 @@ async def receive_single_order(
         if existing.data:
             return {"success": True, "message": "Order already exists", "inserted": False}
         
-        # Find restaurant_owner_id
-        owner_result = dbb.table("restaurant_owners").select("id").eq(
-            "restaurant_uid", order.restaurant_id
-        ).execute()
-        
+        # Find restaurant_owner_id by restaurant_phone
         restaurant_owner_id = None
-        if owner_result.data:
-            restaurant_owner_id = owner_result.data[0]["id"]
+        if order.restaurant_phone:
+            owner_result = dbb.table("restaurant_owners").select("id").eq(
+                "restaurant_phone", order.restaurant_phone
+            ).execute()
+            
+            if owner_result.data:
+                restaurant_owner_id = owner_result.data[0]["id"]
         
         # Insert order
         dbb.table("fetched_orders").insert({
@@ -160,6 +164,7 @@ async def receive_single_order(
             "order_id": order.order_id,
             "customer_name": order.customer_name,
             "customer_phone": order.customer_phone,
+            "restaurant_phone": order.restaurant_phone,
             "items": order.items,
             "total_amount": order.total_amount,
             "payment_status": order.payment_status,

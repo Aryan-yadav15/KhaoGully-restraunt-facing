@@ -27,15 +27,15 @@ const IndividualView: React.FC<IndividualViewProps> = ({ orders, onOrderResponse
   const validOrders = (orders || []).filter(order => order && (order.id || order.order_id));
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+    <div className="glass-panel rounded-2xl p-8">
       <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl font-bold text-[#1A1A1A] flex items-center">
-          <span className="bg-[#1A1A1A]/10 text-[#1A1A1A] p-2 rounded-lg mr-3">
+        <h2 className="text-2xl font-bold text-secondary flex items-center">
+          <span className="bg-secondary/10 text-secondary p-2 rounded-lg mr-3">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
           </span>
           Individual Orders
         </h2>
-        <span className="bg-[#1A1A1A]/10 text-[#1A1A1A] px-3 py-1 rounded-full text-sm font-medium border border-[#1A1A1A]/20">
+        <span className="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-sm font-medium border border-secondary/20">
           {validOrders.length} Orders
         </span>
       </div>
@@ -53,7 +53,7 @@ const IndividualView: React.FC<IndividualViewProps> = ({ orders, onOrderResponse
             return (
               <div
                 key={orderId}
-                className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-lg hover:border-[#1C8C3C]/30 transition-all duration-200 group"
+                className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-lg hover:border-primary/30 transition-all duration-200 group"
               >
                 <div className="flex justify-between items-start mb-4 pb-3 border-b border-gray-100">
                   <div>
@@ -126,7 +126,7 @@ const IndividualView: React.FC<IndividualViewProps> = ({ orders, onOrderResponse
                     {order.customer_phone && (
                       <a
                         href={`tel:${order.customer_phone}`}
-                        className="text-xs font-semibold text-[#1C8C3C] hover:text-[#156b2e] flex items-center"
+                        className="text-xs font-semibold text-primary hover:text-primary-dark flex items-center"
                       >
                         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
@@ -166,7 +166,7 @@ const IndividualView: React.FC<IndividualViewProps> = ({ orders, onOrderResponse
                       <button
                         onClick={() => handleOrderResponse(orderId, 'accepted')}
                         disabled={processingOrders.has(orderId)}
-                        className="flex-1 bg-[#1C8C3C] text-white px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-[#156b2e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                        className="flex-1 bg-primary text-white px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                       >
                         {processingOrders.has(orderId) ? (
                           <>
