@@ -19,8 +19,8 @@ const CumulativeView: React.FC<CumulativeViewProps> = ({ items }) => {
         </span>
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <p className="text-sm text-blue-800">
+      <div className="bg-brand-50 border border-brand-200 rounded-lg p-4 mb-6">
+        <p className="text-sm text-brand-800">
           <strong>Note:</strong> This is a read-only summary of all items. Accept or reject individual orders below.
         </p>
       </div>

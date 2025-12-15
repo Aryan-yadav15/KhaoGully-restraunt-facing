@@ -62,7 +62,7 @@ const EarningsDashboard: React.FC = () => {
         <div className="text-red-600 text-xl mb-4">{error}</div>
         <button
           onClick={fetchEarningsData}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="btn-primary px-6 py-2"
         >
           Retry
         </button>
@@ -104,7 +104,7 @@ const EarningsDashboard: React.FC = () => {
         </div>
 
         {/* Pending Earnings */}
-        <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg shadow-lg p-6 text-white card-hover">
+        <div className="bg-gradient-to-br from-brand-500 to-brand-600 rounded-lg shadow-lg p-6 text-brand-950 card-hover">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium opacity-90">Pending Earnings</h3>
             <svg className="w-8 h-8 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,7 +120,7 @@ const EarningsDashboard: React.FC = () => {
         </div>
 
         {/* Total Orders */}
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white card-hover">
+        <div className="bg-gradient-to-br from-brand-600 to-brand-700 rounded-lg shadow-lg p-6 text-white card-hover">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium opacity-90">Completed Orders</h3>
             <svg className="w-8 h-8 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,7 +132,7 @@ const EarningsDashboard: React.FC = () => {
         </div>
 
         {/* Commission Info */}
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 text-white card-hover">
+        <div className="bg-gradient-to-br from-brand-800 to-brand-900 rounded-lg shadow-lg p-6 text-white card-hover">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium opacity-90">Platform Commission</h3>
             <svg className="w-8 h-8 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -202,7 +202,7 @@ const EarningsDashboard: React.FC = () => {
       {/* Sync Status */}
       <div className="mt-6 text-sm text-gray-600">
         <p>
-          Sync Status: <span className={`font-medium ${summary.sync_status === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+          Sync Status: <span className={`font-medium ${summary.sync_status === 'success' ? 'text-brand-600' : 'text-red-600'}`}>
             {summary.sync_status.toUpperCase()}
           </span>
         </p>

@@ -75,9 +75,9 @@ const IndividualView: React.FC<IndividualViewProps> = ({ orders, onOrderResponse
                     <span
                       className={`px-2 py-1 text-xs font-bold rounded-md uppercase tracking-wide ${
                         order.payment_status === 'paid'
-                          ? 'bg-green-50 text-green-700 border border-green-100'
+                          ? 'bg-brand-50 text-brand-700 border border-brand-100'
                           : order.payment_status === 'pending'
-                          ? 'bg-yellow-50 text-yellow-700 border border-yellow-100'
+                          ? 'bg-brand-50 text-brand-800 border border-brand-100'
                           : 'bg-red-50 text-red-700 border border-red-100'
                       }`}
                     >
@@ -141,7 +141,7 @@ const IndividualView: React.FC<IndividualViewProps> = ({ orders, onOrderResponse
                     // Show decision status
                     <div className={`flex items-center justify-center px-4 py-3 rounded-lg font-bold text-sm ${
                       order.order_status === 'accepted' 
-                        ? 'bg-green-100 text-green-800 border-2 border-green-300' 
+                        ? 'bg-brand-100 text-brand-800 border-2 border-brand-300' 
                         : 'bg-red-100 text-red-800 border-2 border-red-300'
                     }`}>
                       {order.order_status === 'accepted' ? (

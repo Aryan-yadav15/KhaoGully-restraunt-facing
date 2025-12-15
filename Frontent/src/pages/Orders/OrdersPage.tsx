@@ -226,7 +226,7 @@ const OrdersPage = () => {
       )}
 
       {success && (
-        <div className="bg-green-50 border border-green-200 text-green-700 px-6 py-4 rounded-xl mb-6 flex items-center shadow-sm animate-fade-in">
+        <div className="bg-brand-50 border border-brand-200 text-brand-700 px-6 py-4 rounded-xl mb-6 flex items-center shadow-sm animate-fade-in">
           <svg className="w-6 h-6 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
           {success}
         </div>
@@ -235,7 +235,7 @@ const OrdersPage = () => {
       {hasOrders && cumulativeItems && cumulativeItems.length > 0 && (
         <div className="space-y-8 animate-fade-in-up">
           {/* Timestamp and Countdown Display */}
-          <div className="bg-gradient-to-r from-primary/10 to-blue-50 rounded-2xl border border-primary/20 p-6">
+          <div className="bg-gradient-to-r from-primary/10 to-brand-50 rounded-2xl border border-primary/20 p-6">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               {/* Refresh Button */}
               <button
@@ -283,13 +283,13 @@ const OrdersPage = () => {
               {/* Order Count */}
               <div className="flex items-center gap-3">
                 <div className="bg-white p-3 rounded-lg shadow-sm">
-                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                   </svg>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 font-medium">Pending Orders</p>
-                  <p className="text-2xl font-bold text-blue-600">
+                  <p className="text-2xl font-bold text-brand-600">
                     {individualOrders.filter(order => !order.responded).length}
                   </p>
                 </div>

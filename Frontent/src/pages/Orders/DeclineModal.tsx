@@ -121,7 +121,7 @@ const DeclineModal: React.FC<DeclineModalProps> = ({
               {totalQuantity > 2 && (
                 <button
                   onClick={() => setDeclineQuantity(Math.floor(totalQuantity / 2))}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${declineQuantity === Math.floor(totalQuantity / 2) ? 'bg-yellow-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${declineQuantity === Math.floor(totalQuantity / 2) ? 'bg-brand-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                 >
                   Half ({Math.floor(totalQuantity / 2)})
                 </button>

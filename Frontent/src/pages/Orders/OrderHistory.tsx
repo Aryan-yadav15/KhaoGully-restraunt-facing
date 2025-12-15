@@ -50,22 +50,22 @@ const OrderHistory = () => {
         );
       case 'pending':
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-50 text-yellow-700 border border-yellow-200">
-            <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full mr-1.5"></span>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-200">
+            <span className="w-1.5 h-1.5 bg-brand-500 rounded-full mr-1.5"></span>
             Pending
           </span>
         );
       case 'out_for_delivery':
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5"></span>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-100 text-brand-800 border border-brand-300">
+            <span className="w-1.5 h-1.5 bg-brand-600 rounded-full mr-1.5"></span>
             Out for Delivery
           </span>
         );
       case 'delivered':
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
-            <span className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1.5"></span>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand-900 border border-brand-200">
+            <span className="w-1.5 h-1.5 bg-brand-800 rounded-full mr-1.5"></span>
             Delivered
           </span>
         );
@@ -157,9 +157,9 @@ const OrderHistory = () => {
             <p className="text-sm text-red-600 mb-1">Rejected</p>
             <p className="text-3xl font-bold text-red-700">{stats.rejected}</p>
           </div>
-          <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-100">
-            <p className="text-sm text-yellow-600 mb-1">Pending</p>
-            <p className="text-3xl font-bold text-yellow-700">{stats.pending}</p>
+          <div className="bg-brand-50 rounded-xl p-4 border border-brand-100">
+            <p className="text-sm text-brand-600 mb-1">Pending</p>
+            <p className="text-3xl font-bold text-brand-700">{stats.pending}</p>
           </div>
         </div>
       </div>
@@ -203,7 +203,7 @@ const OrderHistory = () => {
           <button
             onClick={() => setFilter('pending')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              filter === 'pending' ? 'bg-yellow-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              filter === 'pending' ? 'bg-brand-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
             Pending ({stats.pending})
@@ -239,7 +239,7 @@ const OrderHistory = () => {
                         <span className={`px-2 py-1 text-xs font-medium rounded ${
                           order.payment_status === 'paid' 
                             ? 'bg-primary/10 text-primary' 
-                            : 'bg-yellow-50 text-yellow-700'
+                            : 'bg-brand-50 text-brand-700'
                         }`}>
                           {order.payment_status.toUpperCase()}
                         </span>

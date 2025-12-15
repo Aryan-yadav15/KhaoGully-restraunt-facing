@@ -1,11 +1,25 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #1C8C3C;
-  --color-primary-light: #2AAF4F;
-  --color-primary-dark: #157030;
+  /* Green palette (Coolors): 004B23 006400 007200 008000 38B000 70E000 9EF01A CCFF33 */
+  --color-brand-950: #004B23;
+  --color-brand-900: #006400;
+  --color-brand-800: #007200;
+  --color-brand-700: #008000;
+  --color-brand-600: #38B000;
+  --color-brand-500: #70E000;
+  --color-brand-400: #9EF01A;
+  --color-brand-300: #CCFF33;
+  --color-brand-200: #D9FF66;
+  --color-brand-100: #E6FF99;
+  --color-brand-50: #F2FFCC;
+
+  /* Semantic tokens */
+  --color-primary: var(--color-brand-700);
+  --color-primary-light: var(--color-brand-600);
+  --color-primary-dark: var(--color-brand-900);
   --color-secondary: #1A1A1A;
-  --color-accent: #E5F4EA;
+  --color-accent: var(--color-brand-300);
   
   --color-surface: #FFFFFF;
   --color-background: #F5F5F5;
@@ -41,7 +55,7 @@ code {
 }
 
 .glass-nav {
-  background: rgba(28, 140, 60, 0.95); /* Primary color with opacity */
+  background: rgba(0, 100, 0, 0.92); /* brand-900 with opacity */
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -66,7 +80,7 @@ code {
 
 .btn-primary:hover {
   background-color: var(--color-primary-dark);
-  box-shadow: 0 10px 15px -3px rgba(28, 140, 60, 0.25);
+  box-shadow: 0 10px 15px -3px rgba(0, 128, 0, 0.25);
 }
 
 .btn-secondary {
@@ -95,6 +109,6 @@ code {
 .input-field:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(28, 140, 60, 0.12);
+  box-shadow: 0 0 0 4px rgba(0, 128, 0, 0.12);
   background-color: var(--color-surface);
 }
