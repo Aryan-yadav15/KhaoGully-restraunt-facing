@@ -21,8 +21,11 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
-              <Link to="/" className="text-2xl font-black text-white tracking-tight hover:opacity-90 transition-opacity">
-                Khao<span className="text-secondary">Gully</span>
+              <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+                <img src="/LogoCircle.svg" alt="KhaoGully Logo" className="h-10 w-10" />
+                <span className="text-2xl font-black text-white tracking-tight">
+                  Khao<span className="text-secondary">Gully</span>
+                </span>
               </Link>
               {isAuthenticated && (
                 <span className="px-3 py-1 text-xs font-semibold rounded-full bg-white/20 text-white border border-white/30 backdrop-blur-sm">
