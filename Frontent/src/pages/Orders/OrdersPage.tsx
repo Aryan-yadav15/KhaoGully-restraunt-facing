@@ -163,26 +163,26 @@ const OrdersPage = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto pb-12">
-      <div className="glass-panel rounded-2xl p-8 mb-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+    <div className="w-full max-w-7xl mx-auto pb-8 sm:pb-12">
+      <div className="glass-panel rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8">
+        <div className="flex flex-col gap-4 mb-6">
           <div>
-            <h1 className="text-4xl font-bold text-secondary mb-2">Orders Dashboard</h1>
-            <p className="text-gray-500">Manage your incoming orders</p>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary mb-1 sm:mb-2">Orders Dashboard</h1>
+            <p className="text-sm sm:text-base text-gray-500">Manage your incoming orders</p>
           </div>
-          <div className="mt-4 md:mt-0 flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <Link
               to="/orders/history"
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium transition-colors"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium transition-colors text-sm sm:text-base"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               Order History
             </Link>
-            <div className="inline-block bg-primary/10 px-4 py-2 rounded-lg border border-primary/20">
-              <p className="text-sm text-primary font-semibold">{user?.restaurant_name || 'N/A'}</p>
-              <p className="text-xs text-primary/70">{user?.full_name || 'N/A'}</p>
+            <div className="bg-primary/10 px-4 py-2 rounded-lg border border-primary/20">
+              <p className="text-sm text-primary font-semibold truncate">{user?.restaurant_name || 'N/A'}</p>
+              <p className="text-xs text-primary/70 truncate">{user?.full_name || 'N/A'}</p>
             </div>
           </div>
         </div>
@@ -233,15 +233,15 @@ const OrdersPage = () => {
       )}
 
       {hasOrders && cumulativeItems && cumulativeItems.length > 0 && (
-        <div className="space-y-8 animate-fade-in-up">
+        <div className="space-y-6 sm:space-y-8 animate-fade-in-up">
           {/* Timestamp and Countdown Display */}
-          <div className="bg-gradient-to-r from-primary/10 to-brand-50 rounded-2xl border border-primary/20 p-6">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              {/* Refresh Button */}
+          <div className="bg-gradient-to-r from-primary/10 to-brand-50 rounded-xl sm:rounded-2xl border border-primary/20 p-4 sm:p-6">
+            <div className="flex flex-col gap-4">
+              {/* Refresh Button - Full width on mobile */}
               <button
                 onClick={handleCheckOrders}
                 disabled={loading}
-                className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 rounded-lg border border-primary/30 text-primary font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-gray-50 rounded-lg border border-primary/30 text-primary font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
                 title="Check for new orders"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -250,48 +250,51 @@ const OrdersPage = () => {
                 Refresh Orders
               </button>
 
-              {/* Orders Received Time */}
-              <div className="flex items-center gap-3">
-                <div className="bg-white p-3 rounded-lg shadow-sm">
-                  <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+              {/* Info Cards - Stacked on mobile, grid on larger screens */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                {/* Orders Received Time */}
+                <div className="flex items-center gap-3 bg-white/50 p-3 rounded-lg">
+                  <div className="bg-white p-2.5 sm:p-3 rounded-lg shadow-sm flex-shrink-0">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-600 font-medium">Orders Received</p>
+                    <p className="text-sm sm:text-base font-bold text-gray-900 truncate">
+                      {fetchedAt ? formatTimestamp(fetchedAt) : 'Just now'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-600 font-medium">Orders Received</p>
-                  <p className="text-lg font-bold text-gray-900">
-                    {fetchedAt ? formatTimestamp(fetchedAt) : 'Just now'}
-                  </p>
-                </div>
-              </div>
 
-              {/* Countdown Timer */}
-              <div className="flex items-center gap-3">
-                <div className={`bg-white p-3 rounded-lg shadow-sm ${timeRemaining <= 300 ? 'animate-pulse' : ''}`}>
-                  <svg className={`w-6 h-6 ${timeRemaining <= 300 ? 'text-red-600' : 'text-orange-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                {/* Countdown Timer */}
+                <div className="flex items-center gap-3 bg-white/50 p-3 rounded-lg">
+                  <div className={`bg-white p-2.5 sm:p-3 rounded-lg shadow-sm flex-shrink-0 ${timeRemaining <= 300 ? 'animate-pulse' : ''}`}>
+                    <svg className={`w-5 h-5 sm:w-6 sm:h-6 ${timeRemaining <= 300 ? 'text-red-600' : 'text-orange-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs sm:text-sm text-gray-600 font-medium">Time Remaining</p>
+                    <p className={`text-xl sm:text-2xl font-bold ${timeRemaining <= 300 ? 'text-red-600' : 'text-orange-600'}`}>
+                      {formatCountdown(timeRemaining)}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-600 font-medium">Time Remaining</p>
-                  <p className={`text-2xl font-bold ${timeRemaining <= 300 ? 'text-red-600' : 'text-orange-600'}`}>
-                    {formatCountdown(timeRemaining)}
-                  </p>
-                </div>
-              </div>
 
-              {/* Order Count */}
-              <div className="flex items-center gap-3">
-                <div className="bg-white p-3 rounded-lg shadow-sm">
-                  <svg className="w-6 h-6 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600 font-medium">Pending Orders</p>
-                  <p className="text-2xl font-bold text-brand-600">
-                    {individualOrders.filter(order => !order.responded).length}
-                  </p>
+                {/* Order Count */}
+                <div className="flex items-center gap-3 bg-white/50 p-3 rounded-lg">
+                  <div className="bg-white p-2.5 sm:p-3 rounded-lg shadow-sm flex-shrink-0">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs sm:text-sm text-gray-600 font-medium">Pending Orders</p>
+                    <p className="text-xl sm:text-2xl font-bold text-brand-600">
+                      {individualOrders.filter(order => !order.responded).length}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
