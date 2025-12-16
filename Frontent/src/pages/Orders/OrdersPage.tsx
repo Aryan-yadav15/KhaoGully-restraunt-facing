@@ -182,7 +182,7 @@ const OrdersPage = () => {
 
   const handleAutoRejectPending = async () => {
     try {
-      const result = await ordersService.autoRejectPending();
+      await ordersService.autoRejectPending();
       setSuccess('Pending orders have been auto-rejected (10-minute timer expired)');
       
       // Refresh orders to update the UI
