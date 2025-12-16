@@ -6,6 +6,7 @@ import { CumulativeItem, CustomerOrder } from '../../types/order.types';
 import CumulativeView from './CumulativeView';
 import IndividualView from './IndividualView';
 
+const AUTO_REJECT_DURATION = 10 * 60; // 10 minutes in seconds
 const COUNTDOWN_DURATION = 30 * 60; // 30 minutes in seconds
 
 const OrdersPage = () => {
@@ -18,6 +19,8 @@ const OrdersPage = () => {
   const [hasOrders, setHasOrders] = useState(false);
   const [fetchedAt, setFetchedAt] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number>(COUNTDOWN_DURATION);
+  const [markingSent, setMarkingSent] = useState(false);
+  const [autoRejectedTriggered, setAutoRejectedTriggered] = useState(false);
 
   useEffect(() => {
     checkOwnerStatus();
@@ -31,10 +34,24 @@ const OrdersPage = () => {
 
     const calculateTimeRemaining = () => {
       const fetchTime = new Date(fetchedAt).getTime();
-      const expiryTime = fetchTime + (COUNTDOWN_DURATION * 1000); // 30 min after fetch
       const now = Date.now();
+      const elapsed = Math.floor((now - fetchTime) / 1000);
+      
+      // Stage 1: 0-10 minutes - Auto-reject pending orders at 10 minutes
+      if (elapsed >= AUTO_REJECT_DURATION && !autoRejectedTriggered) {
+        setAutoRejectedTriggered(true);
+        handleAutoRejectPending();
+      }
+      
+      // Stage 2: Continue countdown from 30 minutes to 0
+      const expiryTime = fetchTime + (COUNTDOWN_DURATION * 1000);
       const remaining = Math.max(0, Math.floor((expiryTime - now) / 1000));
       setTimeRemaining(remaining);
+      
+      // Auto-trigger mark as sent when timer reaches 0 (after 30 minutes)
+      if (remaining === 0 && hasOrders) {
+        handleMarkAsSent(true); // Pass true to indicate auto-triggered
+      }
     };
 
     // Calculate immediately
@@ -44,7 +61,7 @@ const OrdersPage = () => {
     const timer = setInterval(calculateTimeRemaining, 1000);
 
     return () => clearInterval(timer);
-  }, [hasOrders, fetchedAt]);
+  }, [hasOrders, fetchedAt, autoRejectedTriggered]);
 
   const restoreOrders = async () => {
     try {
@@ -118,6 +135,7 @@ const OrdersPage = () => {
       setIndividualOrders(response.individual_orders || []);
       setFetchedAt(fetchTime);
       setHasOrders(true);
+      setAutoRejectedTriggered(false);
       setSuccess('Orders loaded successfully!');
     } catch (err: any) {
       console.error('Fetch orders error:', err);
@@ -159,6 +177,52 @@ const OrdersPage = () => {
       setTimeout(() => setSuccess(''), 3000);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to submit response');
+    }
+  };
+
+  const handleAutoRejectPending = async () => {
+    try {
+      const result = await ordersService.autoRejectPending();
+      setSuccess('Pending orders have been auto-rejected (10-minute timer expired)');
+      
+      // Refresh orders to update the UI
+      await restoreOrders();
+      
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccess(''), 5000);
+    } catch (err: any) {
+      console.error('Failed to auto-reject pending orders:', err);
+    }
+  };
+
+  const handleMarkAsSent = async (autoTriggered: boolean = false) => {
+    if (markingSent) return; // Prevent duplicate calls
+    
+    setMarkingSent(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const result = await ordersService.markOrdersAsSent();
+      
+      if (autoTriggered) {
+        setSuccess('Orders automatically marked as sent (30-minute timer expired)');
+      } else {
+        setSuccess(result.message || 'Orders marked as sent for delivery!');
+      }
+      
+      // Clear the orders from view
+      setHasOrders(false);
+      setCumulativeItems([]);
+      setIndividualOrders([]);
+      setFetchedAt(null);
+      
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccess(''), 5000);
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to mark orders as sent');
+    } finally {
+      setMarkingSent(false);
     }
   };
 
@@ -234,21 +298,54 @@ const OrdersPage = () => {
 
       {hasOrders && cumulativeItems && cumulativeItems.length > 0 && (
         <div className="space-y-6 sm:space-y-8 animate-fade-in-up">
+          {/* Warning Alert for 10-minute deadline */}
+          {timeRemaining > (COUNTDOWN_DURATION - AUTO_REJECT_DURATION) && !autoRejectedTriggered && (
+            <div className="bg-red-50 border-2 border-red-200 rounded-xl sm:rounded-2xl p-4 sm:p-5 animate-fade-in">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <svg className="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-red-800 font-bold text-sm sm:text-base mb-1">⏰ Action Required</h3>
+                  <p className="text-red-700 text-xs sm:text-sm leading-relaxed">
+                    <strong>Accept or reject all orders within the first 10 minutes.</strong> Any pending orders will be automatically rejected after 10 minutes. You'll then have 20 more minutes to review before orders are marked as sent.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Timestamp and Countdown Display */}
           <div className="bg-gradient-to-r from-primary/10 to-brand-50 rounded-xl sm:rounded-2xl border border-primary/20 p-4 sm:p-6">
             <div className="flex flex-col gap-4">
-              {/* Refresh Button - Full width on mobile */}
-              <button
-                onClick={handleCheckOrders}
-                disabled={loading}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-gray-50 rounded-lg border border-primary/30 text-primary font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
-                title="Check for new orders"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Refresh Orders
-              </button>
+              {/* Action Buttons - Full width on mobile, side by side on desktop */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={handleCheckOrders}
+                  disabled={loading}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-gray-50 rounded-lg border border-primary/30 text-primary font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed flex-1"
+                  title="Check for new orders"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Refresh Orders
+                </button>
+                
+                <button
+                  onClick={() => handleMarkAsSent(false)}
+                  disabled={markingSent || loading}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 rounded-lg text-white font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed flex-1"
+                  title="Mark all orders as sent for delivery"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  {markingSent ? 'Marking...' : 'Confirm Pickup'}
+                </button>
+              </div>
 
               {/* Info Cards - Stacked on mobile, grid on larger screens */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">

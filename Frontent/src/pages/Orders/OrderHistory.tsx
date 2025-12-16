@@ -48,6 +48,13 @@ const OrderHistory = () => {
             Rejected
           </span>
         );
+      case 'auto_rejected':
+        return (
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200">
+            <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-1.5"></span>
+            Auto-Rejected
+          </span>
+        );
       case 'pending':
         return (
           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-200">
@@ -235,15 +242,6 @@ const OrderHistory = () => {
                         #{order.order_id}
                       </span>
                       {getStatusBadge(order.order_status)}
-                      {order.payment_status && (
-                        <span className={`px-2 py-1 text-xs font-medium rounded ${
-                          order.payment_status === 'paid' 
-                            ? 'bg-primary/10 text-primary' 
-                            : 'bg-brand-50 text-brand-700'
-                        }`}>
-                          {order.payment_status.toUpperCase()}
-                        </span>
-                      )}
                     </div>
                     
                     <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">

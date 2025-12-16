@@ -51,4 +51,16 @@ export const ordersService = {
     const response = await api.get('/owner/order-history');
     return response.data;
   },
+
+  // Mark orders as sent for delivery
+  markOrdersAsSent: async (): Promise<{ success: boolean; message: string }> => {
+    const response = await api.post('/owner/mark-orders-sent');
+    return response.data;
+  },
+
+  // Auto-reject pending orders (called at 10-minute mark)
+  autoRejectPending: async (): Promise<{ success: boolean; message: string }> => {
+    const response = await api.post('/owner/auto-reject-pending');
+    return response.data;
+  },
 };

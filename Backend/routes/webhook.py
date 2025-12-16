@@ -28,6 +28,7 @@ class IncomingOrder(BaseModel):
     payment_status: str
     order_status: str
     created_at: Optional[str] = None
+    pool_id: Optional[str] = None
 
 class WebhookPayload(BaseModel):
     orders: List[IncomingOrder]
@@ -98,7 +99,8 @@ async def receive_orders(
                 "total_amount": order.total_amount,
                 "payment_status": order.payment_status,
                 "order_status": order.order_status,
-                "created_at": order.created_at
+                "created_at": order.created_at,
+                "pool_id": order.pool_id
             }).execute()
             
             inserted_count += 1
@@ -169,7 +171,8 @@ async def receive_single_order(
             "total_amount": order.total_amount,
             "payment_status": order.payment_status,
             "order_status": order.order_status,
-            "created_at": order.created_at
+            "created_at": order.created_at,
+            "pool_id": order.pool_id
         }).execute()
         
         return {"success": True, "message": "Order inserted", "inserted": True}

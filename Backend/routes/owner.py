@@ -53,10 +53,10 @@ async def fetch_orders(current_user: dict = Depends(get_current_user)):
     dbb = get_dbb()
     
     try:
-        # Fetch ALL orders from Database B (not just pending - we need to show accepted/rejected too)
+        # Fetch only active orders (not yet sent for delivery)
         result = dbb.table("fetched_orders").select(
             "order_id, customer_name, customer_phone, items, total_amount, payment_status, order_status, created_at, fetched_at"
-        ).eq("restaurant_owner_id", current_user["id"]).order("fetched_at", desc=True).execute()
+        ).eq("restaurant_owner_id", current_user["id"]).eq("sent_for_delivery", False).order("fetched_at", desc=True).execute()
         
         if not result.data:
             return FetchOrdersResponse(
@@ -257,6 +257,162 @@ async def submit_order_response(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to submit response: {str(e)}"
+        )
+
+
+@router.post("/auto-reject-pending", response_model=MessageResponse)
+async def auto_reject_pending(current_user: dict = Depends(get_current_user)):
+    """
+    Auto-reject all pending orders (not yet accepted/rejected) for the current user
+    This is triggered after 10 minutes from when orders were fetched
+    """
+    dbb = get_dbb()
+    dba = get_dba()
+    
+    try:
+        # Get all active orders that haven't been sent for delivery yet
+        active_orders = dbb.table("fetched_orders").select(
+            "order_id"
+        ).eq("restaurant_owner_id", current_user["id"]).eq("sent_for_delivery", False).execute()
+        
+        if not active_orders.data:
+            return MessageResponse(
+                success=True,
+                message="No active orders to process"
+            )
+        
+        order_ids = [order["order_id"] for order in active_orders.data]
+        
+        # Check which orders don't have responses yet
+        existing_responses = dbb.table("order_responses").select(
+            "order_id"
+        ).in_("order_id", order_ids).execute()
+        
+        responded_order_ids = {resp["order_id"] for resp in existing_responses.data} if existing_responses.data else set()
+        pending_order_ids = [oid for oid in order_ids if oid not in responded_order_ids]
+        
+        # Auto-reject only the pending orders
+        auto_rejected_count = 0
+        if pending_order_ids:
+            for order_id in pending_order_ids:
+                # Insert auto-rejection response
+                dbb.table("order_responses").insert({
+                    "restaurant_owner_id": current_user["id"],
+                    "order_id": order_id,
+                    "item_responses": [],
+                    "overall_status": "auto_rejected",
+                    "synced_to_dba": True
+                }).execute()
+                
+                # Update order status in Database A
+                try:
+                    dba.table("customer_orders").update({
+                        "status": "auto_rejected"
+                    }).eq("id", order_id).execute()
+                except:
+                    pass  # Continue even if DBA update fails
+                
+                # Update order status in Database B
+                dbb.table("fetched_orders").update({
+                    "order_status": "auto_rejected"
+                }).eq("order_id", order_id).execute()
+                
+                auto_rejected_count += 1
+        
+        message = f"Auto-rejected {auto_rejected_count} pending order(s)"
+        
+        return MessageResponse(
+            success=True,
+            message=message
+        )
+    
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to auto-reject pending orders: {str(e)}"
+        )
+
+
+@router.post("/mark-orders-sent", response_model=MessageResponse)
+async def mark_orders_sent(current_user: dict = Depends(get_current_user)):
+    """
+    Mark all active orders (not yet sent for delivery) as sent_for_delivery = TRUE
+    Auto-reject any pending orders that haven't been accepted/rejected
+    This is used when owner clicks "Mark as Sent" or when 30-minute timer expires
+    """
+    dbb = get_dbb()
+    dba = get_dba()
+    
+    try:
+        # First, get all orders that are about to be marked as sent
+        active_orders = dbb.table("fetched_orders").select(
+            "order_id"
+        ).eq("restaurant_owner_id", current_user["id"]).eq("sent_for_delivery", False).execute()
+        
+        if not active_orders.data:
+            return MessageResponse(
+                success=True,
+                message="No active orders to mark as sent"
+            )
+        
+        order_ids = [order["order_id"] for order in active_orders.data]
+        
+        # Check which orders don't have responses yet
+        existing_responses = dbb.table("order_responses").select(
+            "order_id"
+        ).in_("order_id", order_ids).execute()
+        
+        responded_order_ids = {resp["order_id"] for resp in existing_responses.data} if existing_responses.data else set()
+        pending_order_ids = [oid for oid in order_ids if oid not in responded_order_ids]
+        
+        # Auto-reject pending orders
+        auto_rejected_count = 0
+        if pending_order_ids:
+            for order_id in pending_order_ids:
+                # Insert auto-rejection response
+                dbb.table("order_responses").insert({
+                    "restaurant_owner_id": current_user["id"],
+                    "order_id": order_id,
+                    "item_responses": [],
+                    "overall_status": "auto_rejected",
+                    "synced_to_dba": True
+                }).execute()
+                
+                # Update order status in Database A
+                try:
+                    dba.table("customer_orders").update({
+                        "status": "auto_rejected"
+                    }).eq("id", order_id).execute()
+                except:
+                    pass  # Continue even if DBA update fails
+                
+                # Update order status in Database B
+                dbb.table("fetched_orders").update({
+                    "order_status": "auto_rejected"
+                }).eq("order_id", order_id).execute()
+                
+                auto_rejected_count += 1
+        
+        # Now mark all orders as sent for delivery
+        result = dbb.table("fetched_orders").update({
+            "sent_for_delivery": True
+        }).eq("restaurant_owner_id", current_user["id"]).eq("sent_for_delivery", False).execute()
+        
+        updated_count = len(result.data) if result.data else 0
+        
+        message = f"Marked {updated_count} order(s) as sent for delivery"
+        if auto_rejected_count > 0:
+            message += f" ({auto_rejected_count} pending order(s) auto-rejected)"
+        
+        return MessageResponse(
+            success=True,
+            message=message
+        )
+    
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to mark orders as sent: {str(e)}"
         )
 
 
