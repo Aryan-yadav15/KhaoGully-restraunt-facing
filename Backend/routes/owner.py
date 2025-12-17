@@ -51,6 +51,7 @@ async def fetch_orders(current_user: dict = Depends(get_current_user)):
     Returns all orders from the current session (based on fetched_at timestamp)
     """
     dbb = get_dbb()
+    dba = get_dba()
     
     try:
         # Fetch only active orders (not yet sent for delivery)
@@ -63,6 +64,57 @@ async def fetch_orders(current_user: dict = Depends(get_current_user)):
                 cumulative_orders=[],
                 individual_orders=[]
             )
+        
+        # Auto-reject any pending orders that have been pending for more than 10 minutes
+        from datetime import datetime, timedelta, timezone
+        current_time = datetime.now(timezone.utc)
+        auto_reject_threshold = timedelta(minutes=10)
+        
+        for order in result.data:
+            fetched_at = order.get("fetched_at")
+            if fetched_at:
+                try:
+                    # Parse the fetched_at timestamp
+                    fetched_time = datetime.fromisoformat(fetched_at.replace('Z', '+00:00'))
+                    time_elapsed = current_time - fetched_time
+                    
+                    # Check if order has been pending for more than 10 minutes
+                    if time_elapsed > auto_reject_threshold:
+                        order_id = order["order_id"]
+                        
+                        # Check if this order already has a response
+                        existing_response = dbb.table("order_responses").select("order_id").eq("order_id", order_id).execute()
+                        
+                        if not existing_response.data:
+                            # No response yet - auto-reject it
+                            # Insert auto-rejection response
+                            dbb.table("order_responses").insert({
+                                "restaurant_owner_id": current_user["id"],
+                                "order_id": order_id,
+                                "item_responses": [],
+                                "overall_status": "auto_rejected",
+                                "synced_to_dba": True
+                            }).execute()
+                            
+                            # Update order status in Database A
+                            try:
+                                dba.table("customer_orders").update({
+                                    "status": "auto_rejected"
+                                }).eq("id", order_id).execute()
+                            except:
+                                pass  # Continue even if DBA update fails
+                            
+                            # Update order status in Database B
+                            dbb.table("fetched_orders").update({
+                                "order_status": "auto_rejected"
+                            }).eq("order_id", order_id).execute()
+                            
+                            # Update the order in result.data to reflect the auto-rejection
+                            order["order_status"] = "auto_rejected"
+                except Exception as e:
+                    # Log error but continue processing other orders
+                    print(f"Error auto-rejecting order {order.get('order_id')}: {str(e)}")
+                    pass
         
         # Get all orders (not just from the latest batch)
         orders = result.data
