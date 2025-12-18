@@ -278,7 +278,7 @@ const OrderHistory = () => {
 
                   {/* Total */}
                   <div className="lg:text-right">
-                    <p className="text-sm text-gray-500 mb-1">Total Amount</p>
+                    <p className="text-sm text-gray-500 mb-1">Order Value</p>
                     <p className="text-2xl font-bold text-secondary">{formatPrice(order.total_amount)}</p>
                   </div>
                 </div>

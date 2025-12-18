@@ -111,8 +111,8 @@ const IndividualView: React.FC<IndividualViewProps> = ({ orders, onOrderResponse
 
                 <div className="border-t border-gray-100 pt-3 bg-gray-50 -mx-5 -mb-5 px-5 py-3 rounded-b-xl mt-auto">
                   <div className="flex justify-between items-center mb-3">
-                    <p className="text-sm font-medium text-gray-500">Total Amount</p>
-                    <p className="text-lg font-bold text-gray-900">{formatPrice(order.total || order.total_amount || 0)}</p>
+                    <p className="text-sm font-medium text-gray-500">Order Value</p>
+                    <p className="text-lg font-bold text-gray-900">{formatPrice(order.total_amount || 0)}</p>
                   </div>
                   
                   {/* Customer Contact */}

@@ -29,6 +29,12 @@ class IncomingOrder(BaseModel):
     order_status: str
     created_at: Optional[str] = None
     pool_id: Optional[str] = None
+    # New amount breakdown fields (all in paise)
+    subtotal: Optional[int] = None
+    delivery_fee: Optional[int] = None
+    platform_fee: Optional[int] = None
+    total_customer_paid: Optional[int] = None
+    amount_to_collect: Optional[int] = None
 
 class WebhookPayload(BaseModel):
     orders: List[IncomingOrder]
@@ -89,6 +95,14 @@ async def receive_orders(
                     restaurant_owner_id = owner_result.data[0]["id"]
             
             # Insert order into fetched_orders
+            # Debug: Log what we're receiving
+            print(f"📥 Inserting order {order.order_id}:")
+            print(f"   subtotal: {order.subtotal}")
+            print(f"   delivery_fee: {order.delivery_fee}")
+            print(f"   platform_fee: {order.platform_fee}")
+            print(f"   total_customer_paid: {order.total_customer_paid}")
+            print(f"   amount_to_collect: {order.amount_to_collect}")
+            
             dbb.table("fetched_orders").insert({
                 "restaurant_owner_id": restaurant_owner_id,
                 "order_id": order.order_id,
@@ -100,7 +114,12 @@ async def receive_orders(
                 "payment_status": order.payment_status,
                 "order_status": order.order_status,
                 "created_at": order.created_at,
-                "pool_id": order.pool_id
+                "pool_id": order.pool_id,
+                "subtotal": order.subtotal,
+                "delivery_fee": order.delivery_fee,
+                "platform_fee": order.platform_fee,
+                "total_customer_paid": order.total_customer_paid,
+                "amount_to_collect": order.amount_to_collect
             }).execute()
             
             inserted_count += 1
@@ -161,6 +180,14 @@ async def receive_single_order(
                 restaurant_owner_id = owner_result.data[0]["id"]
         
         # Insert order
+        # Debug: Log what we're receiving
+        print(f"📥 Inserting single order {order.order_id}:")
+        print(f"   subtotal: {order.subtotal}")
+        print(f"   delivery_fee: {order.delivery_fee}")
+        print(f"   platform_fee: {order.platform_fee}")
+        print(f"   total_customer_paid: {order.total_customer_paid}")
+        print(f"   amount_to_collect: {order.amount_to_collect}")
+        
         dbb.table("fetched_orders").insert({
             "restaurant_owner_id": restaurant_owner_id,
             "order_id": order.order_id,
@@ -172,7 +199,12 @@ async def receive_single_order(
             "payment_status": order.payment_status,
             "order_status": order.order_status,
             "created_at": order.created_at,
-            "pool_id": order.pool_id
+            "pool_id": order.pool_id,
+            "subtotal": order.subtotal,
+            "delivery_fee": order.delivery_fee,
+            "platform_fee": order.platform_fee,
+            "total_customer_paid": order.total_customer_paid,
+            "amount_to_collect": order.amount_to_collect
         }).execute()
         
         return {"success": True, "message": "Order inserted", "inserted": True}

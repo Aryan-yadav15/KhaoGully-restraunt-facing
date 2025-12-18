@@ -56,7 +56,7 @@ async def fetch_orders(current_user: dict = Depends(get_current_user)):
     try:
         # Fetch only active orders (not yet sent for delivery)
         result = dbb.table("fetched_orders").select(
-            "order_id, customer_name, customer_phone, items, total_amount, payment_status, order_status, created_at, fetched_at"
+            "order_id, customer_name, customer_phone, items, subtotal, total_amount, payment_status, order_status, created_at, fetched_at"
         ).eq("restaurant_owner_id", current_user["id"]).eq("sent_for_delivery", False).order("fetched_at", desc=True).execute()
         
         if not result.data:
@@ -166,7 +166,7 @@ async def fetch_orders(current_user: dict = Depends(get_current_user)):
                 customer_name=order.get("customer_name", "Unknown"),
                 customer_phone=order.get("customer_phone", "N/A"),
                 items=order_items,
-                total_amount=order["total_amount"],
+                total_amount=order.get("subtotal") or order["total_amount"],  # Use subtotal (what restaurant receives), fallback to total_amount for old data
                 fetched_at=order.get("fetched_at"),
                 order_status=response_status,
                 responded=has_response
@@ -200,7 +200,7 @@ async def get_order_history(current_user: dict = Depends(get_current_user)):
     try:
         # Fetch all orders from Database B (fetched_orders table)
         result = dbb.table("fetched_orders").select(
-            "order_id, customer_name, customer_phone, items, total_amount, payment_status, order_status, created_at"
+            "order_id, customer_name, customer_phone, items, subtotal, total_amount, payment_status, order_status, created_at"
         ).eq("restaurant_owner_id", current_user["id"]).order("created_at", desc=True).execute()
         
         if not result.data:
@@ -224,7 +224,7 @@ async def get_order_history(current_user: dict = Depends(get_current_user)):
                 "customer_name": order.get("customer_name", "Unknown"),
                 "customer_phone": order.get("customer_phone", "N/A"),
                 "items": order["items"],
-                "total_amount": order["total_amount"],
+                "total_amount": order.get("subtotal") or order["total_amount"],  # Use subtotal (what restaurant receives), fallback to total_amount for old data
                 "payment_status": order.get("payment_status"),
                 "order_status": order.get("order_status"),
                 "created_at": order.get("created_at"),
@@ -586,7 +586,9 @@ async def get_earnings_transactions(
         if result.data:
             for order in result.data:
                 # Convert amount from paise to rupees
-                order_total = float(order["total_amount"]) / 100.0
+                # Use subtotal (what restaurant receives) instead of total_amount
+                order_subtotal = order.get("subtotal") or order["total_amount"]
+                order_total = float(order_subtotal) / 100.0
                 platform_commission = order_total * commission_rate
                 delivery_fee = 0.0  # No delivery fee data in fetched_orders
                 net_amount = order_total - platform_commission
@@ -659,7 +661,7 @@ async def get_monthly_earnings(current_user: dict = Depends(get_current_user)):
         # Fetch all orders from the last 6 months
         six_months_ago = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         result = dbb.table("fetched_orders").select(
-            "created_at, total_amount, order_status"
+            "created_at, subtotal, total_amount, order_status"
         ).eq("restaurant_owner_id", restaurant_id).gte(
             "created_at", six_months_ago.isoformat()
         ).execute()
@@ -680,7 +682,9 @@ async def get_monthly_earnings(current_user: dict = Depends(get_current_user)):
                     }
                 
                 # Convert from paise to rupees
-                order_total = float(order["total_amount"]) / 100.0
+                # Use subtotal (what restaurant receives) instead of total_amount
+                order_subtotal = order.get("subtotal") or order["total_amount"]
+                order_total = float(order_subtotal) / 100.0
                 platform_commission = order_total * commission_rate
                 net_amount = order_total - platform_commission
                 
