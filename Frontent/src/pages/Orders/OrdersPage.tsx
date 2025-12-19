@@ -198,6 +198,17 @@ const OrdersPage = () => {
   const handleMarkAsSent = async (autoTriggered: boolean = false) => {
     if (markingSent) return; // Prevent duplicate calls
     
+    // Check for pending orders (only if not auto-triggered)
+    if (!autoTriggered) {
+      const pendingOrders = individualOrders.filter(order => !order.responded);
+      if (pendingOrders.length > 0) {
+        setError('Please accept or reject all orders before confirming driver pickup.');
+        // Auto-clear error after 5 seconds
+        setTimeout(() => setError(''), 5000);
+        return;
+      }
+    }
+    
     setMarkingSent(true);
     setError('');
     setSuccess('');
@@ -336,9 +347,9 @@ const OrdersPage = () => {
                 
                 <button
                   onClick={() => handleMarkAsSent(false)}
-                  disabled={markingSent || loading}
+                  disabled={markingSent || loading || individualOrders.filter(order => !order.responded).length > 0}
                   className="flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 rounded-lg text-white font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed flex-1"
-                  title="Mark all orders as sent for delivery"
+                  title={individualOrders.filter(order => !order.responded).length > 0 ? "Accept or reject all orders before confirming driver pickup" : "Mark all orders as sent for delivery"}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
