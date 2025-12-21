@@ -1,7 +1,19 @@
+import logging
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from config import settings
 from routes import auth, admin_auth, owner, admin, webhook
+
+# Ensure app logs (logger.info, etc.) are visible in console.
+# Uvicorn config mainly wires up its own loggers; without this, root has no handlers and INFO logs are dropped.
+_LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+logging.basicConfig(
+    level=_LOG_LEVEL,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 # Create FastAPI app
 app = FastAPI(
@@ -13,6 +25,7 @@ app = FastAPI(
 # Configure CORS
 origins = settings.CORS_ORIGINS.split(",")
 print(f"CORS Origins: {origins}")  # Debug: show loaded origins
+logger.info(f"Logging configured: level={_LOG_LEVEL}")
 
 app.add_middleware(
     CORSMiddleware,
@@ -49,5 +62,6 @@ if __name__ == "__main__":
         "main:app",
         host="0.0.0.0",
         port=settings.BACKEND_PORT,
-        reload=True if settings.ENVIRONMENT == "development" else False
+        reload=True if settings.ENVIRONMENT == "development" else False,
+        log_level=_LOG_LEVEL.lower(),
     )

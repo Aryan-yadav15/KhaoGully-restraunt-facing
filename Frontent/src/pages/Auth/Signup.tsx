@@ -15,7 +15,6 @@ const Signup = () => {
     restaurant_name: '',
     restaurant_address: '',
     restaurant_phone: '',
-    restaurant_email: '',
     bank_account_number: '',
     bank_ifsc_code: '',
     bank_account_holder_name: '',
@@ -155,6 +154,7 @@ const Signup = () => {
                     className="input-field"
                     required
                   />
+                  <p className="text-xs text-gray-500 mt-1">This email will be used for signing in</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -274,33 +274,19 @@ const Signup = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Restaurant Phone <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    name="restaurant_phone"
-                    value={formData.restaurant_phone}
-                    onChange={handleChange}
-                    placeholder="10-digit number"
-                    className="input-field"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Restaurant Email (Optional)
-                  </label>
-                  <input
-                    type="email"
-                    name="restaurant_email"
-                    value={formData.restaurant_email}
-                    onChange={handleChange}
-                    className="input-field"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Restaurant Phone <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="tel"
+                  name="restaurant_phone"
+                  value={formData.restaurant_phone}
+                  onChange={handleChange}
+                  placeholder="10-digit number"
+                  className="input-field"
+                  required
+                />
               </div>
             </div>
           </div>

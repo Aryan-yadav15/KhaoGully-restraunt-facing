@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
+from pydantic import BaseModel
 from models.schemas import (
     OwnerStatusResponse,
     FetchOrdersResponse,
@@ -19,6 +20,9 @@ from models.schemas import (
 from utils.dependencies import get_current_user
 from database import get_dbb, get_dba
 from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/owner", tags=["Restaurant Owner"])
 
@@ -54,10 +58,22 @@ async def fetch_orders(current_user: dict = Depends(get_current_user)):
     dba = get_dba()
     
     try:
+        logger.info(
+            "📦 Fetch orders called: owner_id=%s restaurant_phone=%s restaurant_uid=%s",
+            current_user.get("id"),
+            current_user.get("restaurant_phone"),
+            current_user.get("restaurant_uid"),
+        )
         # Fetch only active orders (not yet sent for delivery)
         result = dbb.table("fetched_orders").select(
             "order_id, customer_name, customer_phone, items, subtotal, total_amount, payment_status, order_status, created_at, fetched_at"
         ).eq("restaurant_owner_id", current_user["id"]).eq("sent_for_delivery", False).order("fetched_at", desc=True).execute()
+
+        logger.info(
+            "📦 fetched_orders query result: owner_id=%s count=%s",
+            current_user.get("id"),
+            len(result.data) if result.data else 0,
+        )
         
         if not result.data:
             return FetchOrdersResponse(
@@ -91,7 +107,6 @@ async def fetch_orders(current_user: dict = Depends(get_current_user)):
                             dbb.table("order_responses").insert({
                                 "restaurant_owner_id": current_user["id"],
                                 "order_id": order_id,
-                                "item_responses": [],
                                 "overall_status": "auto_rejected",
                                 "synced_to_dba": True
                             }).execute()
@@ -273,7 +288,6 @@ async def submit_order_response(
         response_payload = {
             "restaurant_owner_id": current_user["id"],
             "order_id": order_id,
-            "item_responses": [],  # Not used anymore, kept for schema compatibility
             "overall_status": decision,
             "synced_to_dba": True,
             "responded_at": "now()"
@@ -351,7 +365,6 @@ async def auto_reject_pending(current_user: dict = Depends(get_current_user)):
                 dbb.table("order_responses").insert({
                     "restaurant_owner_id": current_user["id"],
                     "order_id": order_id,
-                    "item_responses": [],
                     "overall_status": "auto_rejected",
                     "synced_to_dba": True
                 }).execute()
@@ -425,7 +438,6 @@ async def mark_orders_sent(current_user: dict = Depends(get_current_user)):
                 dbb.table("order_responses").insert({
                     "restaurant_owner_id": current_user["id"],
                     "order_id": order_id,
-                    "item_responses": [],
                     "overall_status": "auto_rejected",
                     "synced_to_dba": True
                 }).execute()
@@ -816,4 +828,74 @@ async def update_bank_details(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to update bank details: {str(e)}"
+        )
+
+
+class PushTokenRequest(BaseModel):
+    push_token: str
+
+@router.post("/register-push-token", response_model=MessageResponse)
+async def register_push_token(
+    request: PushTokenRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Register or update Expo push notification token for the restaurant owner
+    """
+    dbb = get_dbb()
+    
+    try:
+        # Validate token format
+        if not request.push_token or not (request.push_token.startswith("ExponentPushToken[") or request.push_token.startswith("ExpoPushToken[")):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid push token format"
+            )
+        
+        token_preview = request.push_token[:25] + "..."
+        logger.info(f"📲 Register push token: owner_id={current_user['id']} token_preview={token_preview}")
+
+        # Update push token in restaurant_owners table
+        dbb.table("restaurant_owners").update({
+            "push_token": request.push_token,
+            "push_token_updated_at": datetime.now().isoformat()
+        }).eq("id", current_user["id"]).execute()
+        
+        return MessageResponse(
+            success=True,
+            message="Push token registered successfully"
+        )
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to register push token: {str(e)}"
+        )
+
+
+@router.delete("/remove-push-token", response_model=MessageResponse)
+async def remove_push_token(current_user: dict = Depends(get_current_user)):
+    """
+    Remove push notification token (called on logout)
+    """
+    dbb = get_dbb()
+    
+    try:
+        logger.info(f"🧹 Remove push token: owner_id={current_user['id']}")
+        dbb.table("restaurant_owners").update({
+            "push_token": None,
+            "push_token_updated_at": None
+        }).eq("id", current_user["id"]).execute()
+        
+        return MessageResponse(
+            success=True,
+            message="Push token removed successfully"
+        )
+    
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to remove push token: {str(e)}"
         )

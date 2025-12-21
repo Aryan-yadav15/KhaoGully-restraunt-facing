@@ -2,7 +2,11 @@ from fastapi import APIRouter, HTTPException, status, Header
 from pydantic import BaseModel
 from typing import List, Optional
 from database import get_dbb
+from utils.notifications import send_new_orders_notification
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/webhook", tags=["Webhook"])
 
@@ -68,12 +72,19 @@ async def receive_orders(
                 detail="Invalid API key"
             )
     
+    logger.info(f"📥 Webhook /receive-orders hit: orders={len(payload.orders)}")
     dbb = get_dbb()
     inserted_count = 0
     skipped_count = 0
     
+    # Track orders by restaurant owner for notifications
+    owner_orders = {}  # {owner_id: {"orders": [], "total": 0, "phone": "", "push_token": ""}}
+    
     try:
         for order in payload.orders:
+            logger.info(
+                f"➡️ Processing order_id={order.order_id} restaurant_phone={order.restaurant_phone} total_amount={order.total_amount}"
+            )
             # Check if order already exists (prevent duplicates)
             existing = dbb.table("fetched_orders").select("id").eq(
                 "order_id", order.order_id
@@ -81,27 +92,53 @@ async def receive_orders(
             
             if existing.data:
                 # Order already exists, skip
+                logger.info(f"⏭️ Skipping duplicate order_id={order.order_id}")
                 skipped_count += 1
                 continue
             
-            # Find restaurant_owner_id by restaurant_phone
+            # Find restaurant_owner_id by restaurant_uid OR restaurant_phone (fallback)
             restaurant_owner_id = None
-            if order.restaurant_phone:
-                owner_result = dbb.table("restaurant_owners").select("id").eq(
+            push_token = None
+            lookup_method = None
+            
+            # Try 1: lookup by restaurant_uid (primary - synced with external service)
+            if order.restaurant_id:
+                owner_result = dbb.table("restaurant_owners").select("id, push_token").eq(
+                    "restaurant_uid", order.restaurant_id
+                ).execute()
+                
+                if owner_result.data:
+                    restaurant_owner_id = owner_result.data[0]["id"]
+                    push_token = owner_result.data[0].get("push_token")
+                    lookup_method = "restaurant_uid"
+            
+            # Try 2: fallback to restaurant_phone
+            if not restaurant_owner_id and order.restaurant_phone:
+                owner_result = dbb.table("restaurant_owners").select("id, push_token").eq(
                     "restaurant_phone", order.restaurant_phone
                 ).execute()
                 
                 if owner_result.data:
                     restaurant_owner_id = owner_result.data[0]["id"]
+                    push_token = owner_result.data[0].get("push_token")
+                    lookup_method = "restaurant_phone"
+            
+            # Log result
+            if restaurant_owner_id:
+                token_preview = (push_token[:25] + "...") if push_token else None
+                logger.info(
+                    f"👤 Owner lookup ok (via {lookup_method}): owner_id={restaurant_owner_id} push_token={'set' if push_token else 'missing'} preview={token_preview}"
+                )
+            else:
+                logger.warning(
+                    f"⚠️ Owner lookup failed: restaurant_phone={order.restaurant_phone} restaurant_id={order.restaurant_id} (no matching restaurant_owners row)"
+                )
             
             # Insert order into fetched_orders
-            # Debug: Log what we're receiving
-            print(f"📥 Inserting order {order.order_id}:")
-            print(f"   subtotal: {order.subtotal}")
-            print(f"   delivery_fee: {order.delivery_fee}")
-            print(f"   platform_fee: {order.platform_fee}")
-            print(f"   total_customer_paid: {order.total_customer_paid}")
-            print(f"   amount_to_collect: {order.amount_to_collect}")
+            logger.debug(
+                f"🧾 Amount breakdown order_id={order.order_id} subtotal={order.subtotal} delivery_fee={order.delivery_fee} "
+                f"platform_fee={order.platform_fee} total_customer_paid={order.total_customer_paid} amount_to_collect={order.amount_to_collect}"
+            )
             
             dbb.table("fetched_orders").insert({
                 "restaurant_owner_id": restaurant_owner_id,
@@ -123,6 +160,60 @@ async def receive_orders(
             }).execute()
             
             inserted_count += 1
+            logger.info(f"✅ Inserted order_id={order.order_id} (inserted_count={inserted_count})")
+            
+            # Debug: Log notification tracking decision
+            logger.debug(
+                f"🔔 Notification tracking: restaurant_owner_id={'set' if restaurant_owner_id else 'missing'} "
+                f"push_token={'set' if push_token else 'missing'}"
+            )
+            
+            # Track order for push notification
+            if restaurant_owner_id and push_token:
+                if restaurant_owner_id not in owner_orders:
+                    # Get restaurant_phone from database if not in order payload
+                    phone = order.restaurant_phone
+                    if not phone:
+                        owner_phone_result = dbb.table("restaurant_owners").select("restaurant_phone").eq(
+                            "id", restaurant_owner_id
+                        ).execute()
+                        if owner_phone_result.data:
+                            phone = owner_phone_result.data[0].get("restaurant_phone")
+                    
+                    owner_orders[restaurant_owner_id] = {
+                        "orders": [],
+                        "total": 0,
+                        "phone": phone,
+                        "push_token": push_token
+                    }
+                owner_orders[restaurant_owner_id]["orders"].append(order.order_id)
+                owner_orders[restaurant_owner_id]["total"] += order.total_amount
+            elif restaurant_owner_id and not push_token:
+                logger.warning(f"⚠️ Owner has no push_token: owner_id={restaurant_owner_id} order_id={order.order_id}")
+        
+        # Send push notifications to restaurant owners
+        for owner_id, data in owner_orders.items():
+            try:
+                token_preview = (data["push_token"][:25] + "...") if data.get("push_token") else None
+                logger.info(
+                    f"📲 Sending push notification: owner_id={owner_id} orders={len(data['orders'])} total_amount={data['total']} token_preview={token_preview}"
+                )
+                notification_result = send_new_orders_notification(
+                    push_tokens=[data["push_token"]],
+                    orders_count=len(data["orders"]),
+                    total_amount=data["total"],
+                    restaurant_phone=data["phone"]
+                )
+                if notification_result["success"]:
+                    logger.info(f"✅ Notification sent successfully to owner {owner_id}")
+                else:
+                    logger.error(f"❌ Failed to send notification to owner {owner_id}: {notification_result.get('error')}")
+            except Exception as e:
+                logger.error(f"❌ Exception sending notification to owner {owner_id}: {str(e)}")
+
+        logger.info(
+            f"🏁 Webhook /receive-orders complete: total={len(payload.orders)} inserted={inserted_count} skipped={skipped_count} notified_owners={len(owner_orders)}"
+        )
         
         return WebhookResponse(
             success=True,
@@ -169,15 +260,29 @@ async def receive_single_order(
         if existing.data:
             return {"success": True, "message": "Order already exists", "inserted": False}
         
-        # Find restaurant_owner_id by restaurant_phone
+        # Find restaurant_owner_id by restaurant_uid (primary) or restaurant_phone (fallback)
         restaurant_owner_id = None
-        if order.restaurant_phone:
-            owner_result = dbb.table("restaurant_owners").select("id").eq(
+        push_token = None
+        
+        # Try 1: lookup by restaurant_uid (primary - synced with external service)
+        if order.restaurant_id:
+            owner_result = dbb.table("restaurant_owners").select("id, push_token").eq(
+                "restaurant_uid", order.restaurant_id
+            ).execute()
+            
+            if owner_result.data:
+                restaurant_owner_id = owner_result.data[0]["id"]
+                push_token = owner_result.data[0].get("push_token")
+        
+        # Try 2: fallback to restaurant_phone if uid lookup failed
+        if not restaurant_owner_id and order.restaurant_phone:
+            owner_result = dbb.table("restaurant_owners").select("id, push_token").eq(
                 "restaurant_phone", order.restaurant_phone
             ).execute()
             
             if owner_result.data:
                 restaurant_owner_id = owner_result.data[0]["id"]
+                push_token = owner_result.data[0].get("push_token")
         
         # Insert order
         # Debug: Log what we're receiving
@@ -206,6 +311,23 @@ async def receive_single_order(
             "total_customer_paid": order.total_customer_paid,
             "amount_to_collect": order.amount_to_collect
         }).execute()
+        
+        # Send push notification if token exists
+        if push_token:
+            try:
+                logger.info(f"📲 Sending push notification for order {order.order_id}")
+                notification_result = send_new_orders_notification(
+                    push_tokens=[push_token],
+                    orders_count=1,
+                    total_amount=order.total_amount,
+                    restaurant_phone=order.restaurant_phone
+                )
+                if notification_result["success"]:
+                    logger.info(f"✅ Notification sent successfully for order {order.order_id}")
+                else:
+                    logger.error(f"❌ Failed to send notification: {notification_result.get('error')}")
+            except Exception as e:
+                logger.error(f"❌ Exception sending notification: {str(e)}")
         
         return {"success": True, "message": "Order inserted", "inserted": True}
     

@@ -14,7 +14,6 @@ class RestaurantOwnerSignup(BaseModel):
     restaurant_name: str
     restaurant_address: str
     restaurant_phone: str
-    restaurant_email: Optional[str] = None
     bank_account_number: Optional[str] = None
     bank_ifsc_code: Optional[str] = None
     bank_account_holder_name: Optional[str] = None

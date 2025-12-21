@@ -40,7 +40,6 @@ async def signup(data: RestaurantOwnerSignup):
             "restaurant_name": data.restaurant_name,
             "restaurant_address": data.restaurant_address,
             "restaurant_phone": data.restaurant_phone,
-            "restaurant_email": data.restaurant_email,
             "approval_status": "pending"
         }).execute()
         
@@ -56,7 +55,6 @@ async def signup(data: RestaurantOwnerSignup):
                 "restaurant_id": restaurant_id,
                 "restaurant_name": data.restaurant_name,
                 "restaurant_phone": data.restaurant_phone,
-                "restaurant_email": data.restaurant_email,
                 "commission_rate": 0.20,  # Default 20% commission
                 "has_bank_details": has_bank_details,
                 "bank_account_number": data.bank_account_number,

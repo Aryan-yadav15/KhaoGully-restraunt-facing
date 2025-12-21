@@ -30,7 +30,6 @@ export interface SignupFormData {
   restaurant_name: string;
   restaurant_address: string;
   restaurant_phone: string;
-  restaurant_email?: string;
   bank_account_number?: string;
   bank_ifsc_code?: string;
   bank_account_holder_name?: string;
